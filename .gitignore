@@ -1,0 +1,12 @@
+.DS_Store
+.sass-cache
+npm-debug.log
+node_modules
+bower_components
+bas_api.sublime-project
+bas_api.sublime-workspace
+coverage
+plato
+gulp/ssh_logs
+deploy
+
