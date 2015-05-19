@@ -10,6 +10,11 @@ module.exports = {
 			name : 'bas_test',
 			user : 'root',
 			pass : 'root',
-			port : '8889'
+			port : '8889',
+			logging : false
+	},
+	adminAuth : {
+		login : "admin@bas.pl",
+		pass : "aaaaaa6"
 	}
 };

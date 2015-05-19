@@ -10,6 +10,11 @@ module.exports = {
 			name : '',//dbname
 			user : '',
 			pass : '',
-			port : ''
+			port : '',
+			logging : true
+	},
+	adminAuth : {
+		login : "",
+		pass : ""
 	}
 };

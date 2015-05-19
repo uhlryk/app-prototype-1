@@ -10,6 +10,11 @@ module.exports = {
 			name : 'uhlryk_bas',//dbname
 			user : 'uhlryk_bas',
 			pass : 'vds4$#g4ssFF',
-			port : ''
+			port : '',
+			logging : true
+	},
+	adminAuth : {
+		login : "admin@bas.pl",
+		pass : "aaaaaa6"
 	}
 };

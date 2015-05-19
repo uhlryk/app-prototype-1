@@ -7,8 +7,13 @@
 module.exports = function(sequelize, DataTypes) {
 	var Project = sequelize.define("Project",{
 		status: {
-			type: DataTypes.ENUM('active', 'inactive'),
-			defaultValue:'active',
+			type: DataTypes.ENUM('ACTIVE', 'DISABLE'),
+			defaultValue:'ACTIVE',
+			allowNull: false
+		},
+		package: {
+			type: DataTypes.ENUM('BASIC', 'PROFESSIONAL'),
+			defaultValue:'BASIC',
 			allowNull: false
 		},
 		name : {
@@ -17,7 +22,9 @@ module.exports = function(sequelize, DataTypes) {
 			validate : {
 			}
 		},
-		paid_to: {type: DataTypes.DATE},
+		paid_to: {
+			type: DataTypes.DATE,
+		},
 		phone: {
 			type: DataTypes.STRING(15),
 			allowNull: false
@@ -27,7 +34,8 @@ module.exports = function(sequelize, DataTypes) {
 		freezeTableName: true,
 		classMethods: {
 			associate: function (models) {
-				Project.belongsToMany(models.Account, {as : 'projectIdA', through: 'ProjectAccount'});
+				Project.hasMany(models.ProjectAccount);
+				Project.belongsTo(models.Profile);
 				//Project.hasMany(models.Account, {as: 'child', foreignKey: 'parent_id',  through: 'company_relation'});
 			}
 		}

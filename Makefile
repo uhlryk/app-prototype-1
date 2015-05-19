@@ -1,5 +1,7 @@
+run:
+	@DEBUG=server node app.js
 test:
-	@DEBUG=test ./node_modules/.bin/mocha --check-leaks tests \
+	@DEBUG=test ./node_modules/.bin/mocha --check-leaks --timeout 7000 tests \
 
 cover:
 	./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha tests --print both --recursive

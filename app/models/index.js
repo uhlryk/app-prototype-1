@@ -1,3 +1,4 @@
+/*jslint node: true */
 "use strict";
 module.exports = function(config){
 	var fs        = require("fs");
@@ -6,7 +7,8 @@ module.exports = function(config){
 	var sequelize = new Sequelize(config.name, config.user, config.pass, {
 		host : config.host,
 		dialect : config.type,
-		port : config.port
+		port : config.port,
+		logging: config.logging
 	});
 	var db = {};
 
