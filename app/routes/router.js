@@ -15,13 +15,13 @@ router.use(function(req, res, next){
 			token : token
 		}, function(err, data){
 			if(err !== null){
-				return next(err);
+				return res.sendValidationError(err);
 			}
 			if(data === null){
 				return res.sendData(401, {message : "TOKEN_INVALID"});
 			} else {
 				req.user = {
-					type:data.type,
+					type:data.type,//jaki typ usera SUPER || USER
 					AccountId : data.AccountId,
 					data : data.data
 				};
@@ -37,7 +37,7 @@ router.get("/", function(req, res){
 });
 router.use(require("./tokens.js"));
 router.use(require("./profiles.js"));
-router.use("/users", require("./users.js"));
+router.use(require("./users.js"));
 
 // gdy nie znaleziono routa catch 404 and forward to error handler fallback
 router.use(function (req, res, next) {

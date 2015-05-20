@@ -4,6 +4,9 @@ module.exports = {
 		port : 3001,
 		name : "BAS API"
 	},
+	log : {
+		mute : false, //log nie będzie wyświetlał requestów na serwer, w praktyce chyba tylko dla testów jest to ok
+	},
 	db : {
 			type : '',
 			host : '',

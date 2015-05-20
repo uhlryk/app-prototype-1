@@ -23,5 +23,8 @@ module.exports = function(data, cb, models){
 				AccountId : tokenModel.AccountId,
 			});
 		}
+	})
+	.catch(function (err) {
+		cb(err);
 	});
 };

@@ -23,6 +23,7 @@
     "gulp-scp": "0.0.3",
     "gulp-shell": "^0.4.1",
     "gulp-ssh": "^0.3.3",
+    "gulp-todo": "^2.6.1",
     "gulp-zip": "^3.0.2",
     "istanbul": "^0.3.14",
     "mocha": "^2.2.5",

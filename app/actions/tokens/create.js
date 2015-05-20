@@ -36,6 +36,9 @@ module.exports = function(data, cb, models){
 			cb(null, {
 				token : tokenModel.token
 			});
+		})
+		.catch(function (err) {
+			cb(err);
 		});
 	});
 

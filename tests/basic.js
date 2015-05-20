@@ -10,6 +10,7 @@ var url = 'http://localhost:' + config.app.port;
  * podstawowe testy, czy serwer działa i logowanie
  */
 describe("Basic test: ", function(){
+	//TODO: spróbować zepsuć token tak by walidator bazy się odpalił, może z wysłaniem pustego tokena, albo bardzo długiego?
 	var runningServer;
 	before(function(done){
 		runningServer = serverBuilder(config, done);
@@ -31,7 +32,7 @@ describe("Basic test: ", function(){
 					done();
 				});
 			});
-			it("should return valid status if token is valid", function(done){
+			it("should return valid status when token is valid", function(done){
 				request.post(url + "/tokens")
 				.send({ login: config.adminAuth.login, password: config.adminAuth.pass, type : "super"})
 				.end(function(err, res){
@@ -43,7 +44,7 @@ describe("Basic test: ", function(){
 					});
 				});
 			});
-			it("should return invalid status if token is disabled/invalid ", function(done){
+			it("should return invalid status when token is disabled/invalid ", function(done){
 				var firstToken;
 				request.post(url + "/tokens")
 				.send({ login: config.adminAuth.login, password: config.adminAuth.pass, type : "super"})
@@ -63,7 +64,7 @@ describe("Basic test: ", function(){
 			});
 		});
 		describe("authorization", function(){
-			it("should block if existing token is disabled/invalid", function(done){
+			it("should block when existing token is disabled/invalid", function(done){
 				var firstToken;
 				request.post(url + "/tokens")
 				.send({ login: config.adminAuth.login, password: config.adminAuth.pass, type : "super"})
@@ -82,7 +83,7 @@ describe("Basic test: ", function(){
 					});
 				});
 			});
-			it("should allow if existing token is valid", function(done){
+			it("should allow when existing token is valid", function(done){
 				request.post(url + "/tokens")
 				.send({ login: config.adminAuth.login, password: config.adminAuth.pass, type : "super"})
 				.end(function(err, res){
@@ -106,20 +107,15 @@ describe("Basic test: ", function(){
 				done();
 			});
 		});
-		it("should login", function(done){
+		it("should login when credentials are ok", function(done){
 			request.post(url + "/tokens")
 			.send({ login: config.adminAuth.login, password: config.adminAuth.pass, type : "super"})
 			.end(function(err, res){
 				expect(res.status).to.be.equal(200);
-				debug(res.type);
 				expect(res.body.token).to.be.a("string");
 				done();
 			});
 		});
-
-
-
-
 	});
 	after(function(done){
 		runningServer.close();

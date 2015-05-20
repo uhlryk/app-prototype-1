@@ -8,11 +8,13 @@ module.exports = function(config, callback) {
 	var favicon = require('serve-favicon');
 	var http = require("http");
 	var debug = require('debug')('server');
-	var sequelizeValidationErrorParser = require("./libs/sequelizeValidationErrorParser");
+	var validationErrorParser = require("./libs/validationErrorParser");
 
 	var app = express();
 	app.use(favicon(__dirname + '/../public/favicon.ico'));
-	app.use(logger('dev'));
+	app.use(logger('dev', {
+		skip: function (req, res) { return config.log.mute; }
+	}));
 	app.use(bodyParser.json());
 	app.use(bodyParser.urlencoded({extended: true}));
 	app.use(function (req, res, next) {
@@ -30,7 +32,7 @@ module.exports = function(config, callback) {
 			}
 		};
 		res.sendValidationError = function(validationError){
-			res.status(422).json(sequelizeValidationErrorParser(validationError));
+			res.status(422).json(validationErrorParser(validationError));
 		};
 		next();
 	});
@@ -56,6 +58,7 @@ module.exports = function(config, callback) {
 // will print stacktrace
 if (config.app.env === 'development') {
 	app.use(function (err, req, res, next) {
+		debug(err);
 		res.sendData(err.status || 500, {
 			message: err.message,
 			error: err
@@ -65,10 +68,11 @@ if (config.app.env === 'development') {
 // production error handler
 // no stacktraces leaked to user
 app.use(function (err, req, res, next) {
-		res.sendData(err.status || 500, {
-			message: err.message,
-			error: {}
-		});
+	debug(err);
+	res.sendData(err.status || 500, {
+		message: err.message,
+		error: {}
+	});
 });
 function onError(error) {
 	if (error.syscall !== 'listen') {

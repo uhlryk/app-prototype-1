@@ -10,9 +10,9 @@ var router = new express.Router();
 
 router.post("/profiles", function(req, res){
 	if(req.user === null || req.user.type !== "SUPER"){
-		return res.sendStatus(401);
+		return res.sendData(401, {message : "NO_TOKEN"});
 	}
-	req.app.get("actions").profiles.createProfile({
+	req.app.get("actions").profiles.create({
 		firmname : req.body.firmname,
 		nip : req.body.nip,
 		street_address : req.body.street_address,
@@ -22,10 +22,9 @@ router.post("/profiles", function(req, res){
 		city_address : req.body.city_address,
 	}, function(err, data){
 		if(err !== null){
-			console.log(err);
 			return res.sendValidationError(err);
 		}
-		return res.sendData(200, {link : "/profiles/" + data.id});
+		return res.sendData(200, {id: data.id, link : "/profiles/" + data.id});
 	});
 });
 module.exports = router;

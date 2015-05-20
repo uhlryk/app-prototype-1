@@ -3,19 +3,21 @@
  * @param  {[type]} sequelizeError [description]
  * @return {[type]}                [description]
  */
-module.exports = function(sequelizeValidationError) {
-	if(sequelizeValidationError.name === "SequelizeValidationError"){
-		var validationMessage = {
-			message : "VALIDATION_ERROR"
-		};
-
-		if(sequelizeValidationError.errors !== null && sequelizeValidationError.errors.length > 0){
+module.exports = function(errorObject) {
+	var validationMessage = {};
+	if(errorObject.name === "SequelizeValidationError"){
+		validationMessage.message = "VALIDATION_ERROR";
+		if(errorObject.errors !== null && errorObject.errors.length > 0){
 			validationMessage.errors = [];
-			sequelizeValidationError.errors.forEach(function(error){
+			errorObject.errors.forEach(function(error){
 				var newError = {};
 				switch(error.type){
 					case "notNull Violation":
 						newError.type = "REQUIRE_FIELD";
+						newError.field = error.path;
+					break;
+					case "Validation error":
+						newError.type = "FIELD_VALIDATION_FAILED";
 						newError.field = error.path;
 					break;
 					default:
@@ -28,6 +30,14 @@ module.exports = function(sequelizeValidationError) {
 		} else {
 			return validationMessage;
 		}
+	} else if(errorObject.name === "AwValidationError"){
+		validationMessage.message = "VALIDATION_ERROR";
+		validationMessage.errors = errorObject.errors;
+		return validationMessage;
+	} else if(errorObject.name === "AwProccessError"){
+		validationMessage.message = "PROCESS_ERROR";
+		validationMessage.type = errorObject.type;
+		return validationMessage;
 	} else {
 		return {
 			message : "OTHER_ERROR"//nie obsłużony błąd
