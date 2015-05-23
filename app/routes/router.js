@@ -35,10 +35,10 @@ router.use(function(req, res, next){
 router.get("/", function(req, res){
 	res.status(200).send(req.app.get("config").app.name + " running");
 });
-router.use(require("./tokens.js"));
-router.use(require("./profiles.js"));
-router.use(require("./users.js"));
-
+router.use(require("./token.js"));
+router.use(require("./profile.js"));
+router.use(require("./user.js"));
+router.use(require("./project.js"));
 // gdy nie znaleziono routa catch 404 and forward to error handler fallback
 router.use(function (req, res, next) {
 		var err = new Error('Not Found');

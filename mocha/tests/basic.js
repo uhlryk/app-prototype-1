@@ -1,19 +1,21 @@
-var serverBuilder = require("../app/server.js");
-var config = require("../config/local_test.js");
+var serverBuilder = require("../../app/server.js");
+var config = require("../../config/local_test.js");
 var chai = require("chai");
 chai.use(require('chai-things'));
 var expect = chai.expect;
 var debug = require('debug')('test');
 var request = require('superagent');
 var url = 'http://localhost:' + config.app.port;
+var helper = require("../helper.js")(url);
+
 /**
  * podstawowe testy, czy serwer działa i logowanie
  */
 describe("Basic test: ", function(){
 	//TODO: spróbować zepsuć token tak by walidator bazy się odpalił, może z wysłaniem pustego tokena, albo bardzo długiego?
-	var runningServer;
+	var server;
 	before(function(done){
-		runningServer = serverBuilder(config, done);
+		server = serverBuilder(config, done);
 	});
 	it("should return status code 200 at empty get", function(done){
 		request.get(url + "/")
@@ -118,8 +120,7 @@ describe("Basic test: ", function(){
 		});
 	});
 	after(function(done){
-		runningServer.close();
-		debug("Test Server stop");
+		server.close();
 		done();
 	});
 });

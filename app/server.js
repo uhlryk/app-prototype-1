@@ -9,6 +9,7 @@ module.exports = function(config, callback) {
 	var http = require("http");
 	var debug = require('debug')('server');
 	var validationErrorParser = require("./libs/validationErrorParser");
+	var smsManager = require("./libs/smsManager");
 
 	var app = express();
 	app.use(favicon(__dirname + '/../public/favicon.ico'));
@@ -40,6 +41,7 @@ module.exports = function(config, callback) {
 	var actions = require("./actions")({
 		models : models
 	});
+	app.set('sms', smsManager(config.app.sms));
 	app.set('config', config);
 	app.set('models', models);
 	app.set('actions', actions);
@@ -50,71 +52,76 @@ module.exports = function(config, callback) {
 	app.use(require("./routes/router"));
 
 	var server = http.createServer(app);
+
+	if(config.app.sms === false){
+		server.getSmsDebug = app.get('sms').get;
+	}
+
 	server.on('error', onError);
 	server.on('listening', onListening);
 	server.on('close', onClose);
-// error handlers
-// development error handler
-// will print stacktrace
-if (config.app.env === 'development') {
+	// error handlers
+	// development error handler
+	// will print stacktrace
+	if (config.app.env === 'development') {
+		app.use(function (err, req, res, next) {
+			debug(err);
+			res.sendData(err.status || 500, {
+				message: err.message,
+				error: err
+			});
+		});
+	}
+	// production error handler
+	// no stacktraces leaked to user
 	app.use(function (err, req, res, next) {
 		debug(err);
 		res.sendData(err.status || 500, {
 			message: err.message,
-			error: err
+			error: {}
 		});
 	});
-}
-// production error handler
-// no stacktraces leaked to user
-app.use(function (err, req, res, next) {
-	debug(err);
-	res.sendData(err.status || 500, {
-		message: err.message,
-		error: {}
+	function onError(error) {
+		if (error.syscall !== 'listen') {
+			throw error;
+		}
+		switch (error.code) {
+			case 'EACCES':
+			console.error(' requires elevated privileges');
+			process.exit(1);
+			break;
+			case 'EADDRINUSE':
+			console.error(' is already in use');
+			process.exit(1);
+			break;
+			default:
+			throw error;
+		}
+	}
+	function onClose() {
+		debug("Server Stopped");
+	}
+	/**
+	* Event listener for HTTP server "listening" event.
+	*/
+	function onListening() {
+		var addr = server.address();
+		var bind = typeof addr === 'string' ? 'pipe ' + addr : 'port ' + addr.port;
+		debug('Listening on ' + bind);
+	}
+	/**
+	* przed odpaleniem serwera chcemy warunkowo wyczyścić bazę danych (przy tworzeniu bazy jest to wskazane)
+	* następnie zsynchronizać i utworzyć tabele. Jest to proces asynchroniczny. Który chcę odpalić przed serwerem
+	* Dlatego użyte tu są promise drop>sync>runserver>return promice> w pliku odpalającym mamy .then
+	*/
+	models.sequelize
+	.drop().then(function (){
+		return models.sequelize.sync();
+	})
+	.then(function (){
+		debug("start mode : " + process.env.NODE_ENV);
+		server.listen(app.get("port"));
+		callback();
 	});
-});
-function onError(error) {
-	if (error.syscall !== 'listen') {
-		throw error;
-	}
-	switch (error.code) {
-		case 'EACCES':
-		console.error(' requires elevated privileges');
-		process.exit(1);
-		break;
-		case 'EADDRINUSE':
-		console.error(' is already in use');
-		process.exit(1);
-		break;
-		default:
-		throw error;
-	}
-}
-function onClose() {
-	debug("Server Stopped");
-}
-		/**
-		 * Event listener for HTTP server "listening" event.
-		 */
-		 function onListening() {
-		 	var addr = server.address();
-		 	var bind = typeof addr === 'string' ? 'pipe ' + addr : 'port ' + addr.port;
-		 	debug('Listening on ' + bind);
-		 }
-		/**
-		 * przed odpaleniem serwera chcemy warunkowo wyczyścić bazę danych (przy tworzeniu bazy jest to wskazane)
-		 * następnie zsynchronizać i utworzyć tabele. Jest to proces asynchroniczny. Który chcę odpalić przed serwerem
-		 * Dlatego użyte tu są promise drop>sync>runserver>return promice> w pliku odpalającym mamy .then
-		 */
-		 models.sequelize
-		 .drop().then(function (){
-		 	return models.sequelize.sync();
-		 })
-		 .then(function (){
-			 	debug("start mode : " + process.env.NODE_ENV);
-			 	server.listen(app.get("port"));
-			 	callback();
-		 });
-		 return server;
-		};
+	return server;
+};

@@ -70,10 +70,9 @@ router.post("/tokens/", function(req, res, next){
 				});
 			}else{
 					//TODO: zmienić na sendValidationError i pomyśleć nad zmianą kodu
-				return res.status(422).send("INCORRECT_LOGIN_PASSWORD");
+				return res.sendData(422, {message : "INCORRECT_LOGIN_PASSWORD"});
 			}
 		});
-		return res.sendData(404, {message : "NOT_IMPLEMENTED"});
 	}
 });
 module.exports = router;

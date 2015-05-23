@@ -1,18 +1,19 @@
-var serverBuilder = require("../app/server.js");
-var config = require("../config/local_test.js");
+var serverBuilder = require("../../app/server.js");
+var config = require("../../config/local_test.js");
 var chai = require("chai");
 chai.use(require('chai-things'));
 var expect = chai.expect;
 var debug = require('debug')('test');
 var request = require('superagent');
 var url = 'http://localhost:' + config.app.port;
+var helper = require("../helper.js")(url);
 /**
  * testy związane z dodawaniem, wyświetlaniem profilu
  */
 describe("Create profile admin test: ", function(){
-	var runningServer;
+	var server;
 	before(function(done){
-		runningServer = serverBuilder(config, done);
+		server = serverBuilder(config, done);
 	});
 	describe("Not logged user", function(){
 		it("should not allow to create profile_admin", function(done){
@@ -27,12 +28,8 @@ describe("Create profile admin test: ", function(){
 	describe("Superadmin is logged ", function(){
 		var superUserToken;
 		before(function(done){
-			request.post(url + "/tokens")
-			.send({ login: config.adminAuth.login, password: config.adminAuth.pass, type : "super"})
-			.end(function(err, res){
-				expect(res.status).to.be.equal(200);
-				expect(res.body.token).to.be.a("string");
-				superUserToken = res.body.token;
+			helper.loginAdmin(config.adminAuth.login, config.adminAuth.pass, function(token){
+				superUserToken = token;
 				done();
 			});
 		});
@@ -63,19 +60,16 @@ describe("Create profile admin test: ", function(){
 			.send({profile_id : 999})
 			.end(function(err, res){
 				expect(res.status).to.be.equal(422);
-				expect(res.body.message).to.be.equal("VALIDATION_ERROR");
-				expect(res.body.errors).to.include.some.property("type", "WRONG_VALUE");
+				expect(res.body.message).to.be.equal("PROCESS_ERROR");
+				expect(res.body.type).to.be.equal("EMPTY_PROFILE");
 				done();
 			});
 		});
 		describe("Profile is exisitng ", function(){
 			var profileId;
 			before(function(done){
-				request.post(url + "/profiles")
-				.set('access-token', superUserToken)
-				.send({firmname : "moja firma która ma jakąś nazwę jakiej nie pamiętam, ale jest długa"})
-				.end(function(err, res){
-					profileId = res.body.id;
+				helper.createProfile(superUserToken, "Moja firma 111", function(id){
+					profileId = id;
 					done();
 				});
 			});
@@ -89,10 +83,11 @@ describe("Create profile admin test: ", function(){
 				.send({phone : "+48701633386"})
 				.end(function(err, res){
 					expect(res.status).to.be.equal(200);
-					expect(res.body.id).to.be.above(0);
-					expect(res.body.password).to.be.a("string");
 					expect(res.body.login).to.be.a("string");
+					var smsData = server.getSmsDebug(res.body.login);
+					expect(smsData.password).to.be.a("string");
 					done();
+
 				});
 			});
 			it("should not allow to create profile_admin when not send phone", function(done){
@@ -148,9 +143,22 @@ describe("Create profile admin test: ", function(){
 				.send({phone : "+48701611386"})
 				.end(function(err, res){
 					expect(res.status).to.be.equal(200);
-					expect(res.body.id).to.be.above(0);
-					expect(res.body.password).to.be.a("string");
 					expect(res.body.login).to.be.a("string");
+					var smsData = server.getSmsDebug(res.body.login);
+					expect(smsData.password).to.be.a("string");
+					done();
+				});
+			});
+			it("should allow to create profile_admin when only phone", function(done){
+				request.post(url + "/users/profile_admin")
+				.set('access-token', superUserToken)
+				.send({profile_id : profileId})
+				.send({phone : "+48701011386"})
+				.end(function(err, res){
+					expect(res.status).to.be.equal(200);
+					expect(res.body.login).to.be.a("string");
+					var smsData = server.getSmsDebug(res.body.login);
+					expect(smsData.password).to.be.a("string");
 					done();
 				});
 			});
@@ -180,60 +188,46 @@ describe("Create profile admin test: ", function(){
 			});
 			//TODO: test gdy profil jest nieaktywny to nie można dodać użytkownika. Najpierw funkcja blokowania profilu
 			//TODO: test dodania dla usera nie będącego adminem funkcji admina
-			//TOGO: test nie dodania dla nieadmina opcji admina jeśli jest zablokowany
+			//TODO: test nie dodania dla nieadmina opcji admina jeśli jest zablokowany
 		});
 	});
 	describe("ProfileAdmin exists ", function(){
-		var superUserToken, profileId, profileAdminId, password, login;
+		var superUserToken, profileId, profileAdminPassword, profileAdminLogin;
 		before(function(done){
-			request.post(url + "/tokens")
-			.send({ login: config.adminAuth.login, password: config.adminAuth.pass, type : "super"})
-			.end(function(err, res){
-				superUserToken = res.body.token;
-				request.post(url + "/profiles")
-				.set('access-token', superUserToken)
-				.send({firmname : "moja firma która ma jakąś nazwę jakiej nie pamiętam, ale jest długa"})
-				.end(function(err, res){
-					profileId = res.body.id;
-					it("should allow to create profile_admin when all data send", function(done){
-						request.post(url + "/users/profile_admin")
-						.set('access-token', superUserToken)
-						.send({profile_id : profileId})
-						.send({firstname : "Adam"})
-						.send({lastname : "Kowalski"})
-						.send({email : "kowalski@kowalski.email"})
-						.send({phone : "+48701633386"})
-						.end(function(err, res){
-							profileAdminId = res.body.id;
-							password = res.body.password;
-							login = res.body.login;
-							done();
-						});
+			helper.loginAdmin(config.adminAuth.login, config.adminAuth.pass, function(token){
+				superUserToken = token;
+				helper.createProfile(superUserToken, "Moja firma 112", function(id){
+					profileId = id;
+					helper.createProfileAdmin(superUserToken, profileId, "+48801633386", function(login){
+						profileAdminLogin = login;
+						var smsData = server.getSmsDebug(login);
+						profileAdminPassword = smsData.password;
+						done();
 					});
 				});
 			});
 		});
 		it("should not allow login when credentials are correct but super flag is set", function(done){
 			request.post(url + "/tokens")
-			.send({ login: login, password: password, type : "super"})
+			.send({ login: profileAdminLogin, password: profileAdminPassword, type : "super"})
 			.end(function(err, res){
 				expect(res.status).to.be.equal(422);
 				expect(res.body.message).to.be.equal("INCORRECT_LOGIN_PASSWORD");
 				done();
 			});
 		});
-		it("should not allow when existing login is invalid", function(done){
+		it("should not allow login when login is invalid", function(done){
 			request.post(url + "/tokens")
-			.send({ login: "fsfssaffas", password: password})
+			.send({ login: "fsfssaffas", password: profileAdminPassword})
 			.end(function(err, res){
 				expect(res.status).to.be.equal(422);
 				expect(res.body.message).to.be.equal("INCORRECT_LOGIN_PASSWORD");
 				done();
 			});
 		});
-		it("should not allow when existing password is invalid", function(done){
+		it("should not allow login when password is invalid", function(done){
 			request.post(url + "/tokens")
-			.send({ login: login, password: "fsffassfwe"})
+			.send({ login: profileAdminLogin, password: "fsddffassfwe"})
 			.end(function(err, res){
 				expect(res.status).to.be.equal(422);
 				expect(res.body.message).to.be.equal("INCORRECT_LOGIN_PASSWORD");
@@ -242,31 +236,55 @@ describe("Create profile admin test: ", function(){
 		});
 		it("should login when credentials are ok", function(done){
 			request.post(url + "/tokens")
-			.send({ login: login, password: password})
+			.send({ login: profileAdminLogin, password: profileAdminPassword})
 			.end(function(err, res){
 				expect(res.status).to.be.equal(200);
 				expect(res.body.token).to.be.a("string");
 				done();
 			});
 		});
-		describe("ProfileAdmin is logged ", function(){
-			var profileAdminToken;
+		describe("ProfileAdmin is logged and second profile exist", function(){
+			var profileAdminToken, secondProfileId;
 			before(function(done){
-				request.post(url + "/tokens")
-				.send({ login: login, password: password})
+				helper.loginUser(profileAdminLogin, profileAdminPassword, function(token){
+					profileAdminToken = token;
+					helper.createProfile(superUserToken, "Moja firma 113", function(id){
+						secondProfileId = id;
+						done();
+					});
+				});
+			});
+			it("ProfileAdmin should not allow to add new profile admin, to other profile", function(done){
+				request.post(url + "/users/profile_admin")
+				.set('access-token', profileAdminToken)
+				.send({profile_id : secondProfileId})
+				.send({phone : "+48701011316"})
 				.end(function(err, res){
-					expect(res.status).to.be.equal(200);
-					expect(res.body.token).to.be.a("string");
-					profileAdminToken = res.body.token;
+					expect(res.status).to.be.equal(422);
+					expect(res.body.message).to.be.equal("PROCESS_ERROR");
+					expect(res.body.type).to.be.equal("WRONG_VALUE");
 					done();
 				});
 			});
-
+			it("should allow to add new profile admin, to same profile", function(done){
+				request.post(url + "/users/profile_admin")
+				.set('access-token', profileAdminToken)
+				.send({profile_id : profileId})
+				.send({phone : "+48701011326"})
+				.end(function(err, res){
+					expect(res.status).to.be.equal(200);
+					expect(res.body.login).to.be.a("string");
+					var smsData = server.getSmsDebug(res.body.login);
+					expect(smsData.password).to.be.a("string");
+					done();
+				});
+			});
 		});
+//todo gdy profileadmina chce dodać ktoś kto nie jest profileadminem i gdy nie istnieje dany profil
+//todo gdy profileadmina chce dodać ktoś kto nie jest profileadminem i gdy istnieje dany profil
 	});
 	after(function(done){
-		runningServer.close();
-		debug("Test Server stop");
+		server.close();
 		done();
 	});
 });

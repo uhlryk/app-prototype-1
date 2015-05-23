@@ -16,19 +16,26 @@ module.exports = function(sequelize, DataTypes) {
 			defaultValue:'BASIC',
 			allowNull: false
 		},
+		mode : {// w jakim jesteśmy trybie, budowy czy serwisu
+			type: DataTypes.ENUM('BUILD', 'SERVICE'),
+			defaultValue:'BUILD',
+			allowNull: false
+		},
 		name : {
 			type : DataTypes.STRING(50),
 			allowNull : true,
 			validate : {
 			}
 		},
+		start_date : {
+			type: DataTypes.DATE
+		},
+		finish_date : {
+			type: DataTypes.DATE
+		},
 		paid_to: {
 			type: DataTypes.DATE,
 		},
-		phone: {
-			type: DataTypes.STRING(15),
-			allowNull: false
-		}
 	}, {
 		paranoid: true,
 		freezeTableName: true,

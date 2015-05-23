@@ -37,10 +37,11 @@ module.exports = function(data, cb, models){
 					ProfileId : data.ProfileId,
 					password : bcrypt.hashSync(data.password, 8)
 				}, {transaction : t})
-				.then(function(accountModel){
+				.then(function(account){
 					return {
-						type : "new",
-						AccountId : accountModel.id,
+						firstname : account.firstname,
+						lastname : account.lastname,
+						AccountId : account.id,
 						password : data.password,
 						phone : data.phone,
 						sendSMS : true
@@ -59,8 +60,8 @@ module.exports = function(data, cb, models){
 			cb(null, accountData);
 		})
 		.catch(function (err) {
-			cb(err);
 			t.rollback();
+			cb(err);
 		});
 	});
 

@@ -12,7 +12,7 @@ module.exports = function(sequelize, DataTypes) {
 			allowNull: false
 		},
 		role: {
-			type: DataTypes.ENUM('PROFILE_ADMIN', 'PROJECT_LEADER', 'COWORKER', 'INVESTOR', 'INSPECTOR', 'DESIGNER', 'SUBCONTRACTOR'),
+			type: DataTypes.ENUM('PROJECT_LEADER', 'COWORKER', 'INVESTOR', 'INSPECTOR', 'DESIGNER', 'SUBCONTRACTOR'),
 			allowNull: false
 		},
 	}, {

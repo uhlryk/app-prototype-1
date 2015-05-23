@@ -2,7 +2,8 @@ module.exports = {
 	app : {
 		env : "development",
 		port : 3000,
-		name : "BAS API"
+		name : "BAS API",
+		sms : false
 	},
 	log : {
 		mute : false, //log nie będzie wyświetlał requestów na serwer, w praktyce chyba tylko dla testów jest to ok

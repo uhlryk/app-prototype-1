@@ -1,18 +1,19 @@
-var serverBuilder = require("../app/server.js");
-var config = require("../config/local_test.js");
+var serverBuilder = require("../../app/server.js");
+var config = require("../../config/local_test.js");
 var chai = require("chai");
 chai.use(require('chai-things'));
 var expect = chai.expect;
 var debug = require('debug')('test');
 var request = require('superagent');
 var url = 'http://localhost:' + config.app.port;
+var helper = require("../helper.js")(url);
 /**
  * testy związane z dodawaniem, wyświetlaniem profilu
  */
 describe("Profiles test: ", function(){
-	var runningServer;
+	var server;
 	before(function(done){
-		runningServer = serverBuilder(config, done);
+		server = serverBuilder(config, done);
 	});
 	describe("Not logged user", function(){
 		it("should not allow to create profile", function(done){
@@ -34,12 +35,8 @@ describe("Profiles test: ", function(){
 	describe("Superadmin is logged ", function(){
 		var superUserToken;
 		before(function(done){
-			request.post(url + "/tokens")
-			.send({ login: config.adminAuth.login, password: config.adminAuth.pass, type : "super"})
-			.end(function(err, res){
-				expect(res.status).to.be.equal(200);
-				expect(res.body.token).to.be.a("string");
-				superUserToken = res.body.token;
+			helper.loginAdmin(config.adminAuth.login, config.adminAuth.pass, function(token){
+				superUserToken = token;
 				done();
 			});
 		});
@@ -90,8 +87,7 @@ describe("Profiles test: ", function(){
 //TODO: testy dla innego typu usera że próbuje utworzyć profil
 	});
 	after(function(done){
-		runningServer.close();
-		debug("Test Server stop");
+		server.close();
 		done();
 	});
 });

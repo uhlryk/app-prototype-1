@@ -12,7 +12,7 @@ module.exports = function(sequelize, DataTypes) {
 		 * logować można się tylko na kotno ACTIVE
 		 */
 		status: {
-			type: DataTypes.ENUM('INACTIVE','ACTIVE', 'DISABLE','DELETE'),
+			type: DataTypes.ENUM('INACTIVE','ACTIVE', 'DISABLE'),
 			defaultValue:'ACTIVE',
 			allowNull: false
 		},
