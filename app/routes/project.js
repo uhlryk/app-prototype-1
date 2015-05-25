@@ -7,28 +7,29 @@
 
 var express = require('express');
 var router = new express.Router();
-var phone = require('phone');
+
 var generatePassword = require('password-generator');
 
 router.post("/projects", function(req, res){
 	if(req.user === null)return res.sendData(401, {message : "NO_TOKEN"});
 	if(req.user.type === "SUPER")return res.sendData(403, {message : "NO_AUTHORIZATION"});
-
-	var profileId = Number(req.body.profile_id);//do jakiego profilu firmy jest ten user - zastosowanie tylko dla profile_admin
-	if(Number.isNaN(profileId) || profileId <=0 )return res.sendValidationError({name : "AwValidationError", errors :[{type : "REQUIRE_FIELD", field:"profile_id"}]});
-	if(req.body.phone === undefined || req.body.phone === "")return res.sendValidationError({name : "AwValidationError", errors :[{type : "REQUIRE_FIELD", field:"phone"}]});
-	var phoneValid = phone(req.body.phone);
-	if(phoneValid[0] === undefined){
-		return res.sendValidationError({name : "AwValidationError", errors :[{type : "WRONG_PHONE", field:"phone"}]});
+	req.checkBody('profile_id', 'INVALID_FIELD').isId();
+	req.sanitize('profile_id').toInt();
+	req.sanitize("phone").normalizePhone();
+	req.checkBody('phone', 'REQUIRE_FIELD').notEmpty();
+	var profileId = req.body.profile_id;
+	var login = req.body.phone;
+	var errors = req.validationErrors();
+	if (errors) {
+		return res.sendValidationError({name : "ExpressValidationError", errors :errors});
 	}
-
 	req.app.get("actions").profiles.findShort(profileId,
 	function(err, profileModel){
 		if(err !== null){
 			return res.sendValidationError(err);
 		}
 		if(profileModel.Accounts.indexOf(req.user.AccountId) === -1){//znaczy że dany admin nie administruje profilem dla którego chce zrobić nowego admina
-			return res.sendValidationError({name : "AwProccessError", type : "WRONG_VALUE"});
+			return res.sendData(403, {message : "NO_AUTHORIZATION"});
 		}
 		//wiemy że mamy do czynienia z adminem danego profilu
 		req.app.get("actions").projects.create({
@@ -40,11 +41,10 @@ router.post("/projects", function(req, res){
 			firstname : req.body.firstname,
 			lastname : req.body.lastname,
 			email : req.body.email,
-			phone : phoneValid[0],
+			phone : login,
 			password : generatePassword(12, true),
 		}, function(err, data){
 			if(err !== null){
-				// console.log(err);
 				return res.sendValidationError(err);
 			}
 			if(data.sendSMS){
@@ -66,4 +66,65 @@ router.post("/projects", function(req, res){
 		});
 	});
 });
+/**
+ * lider na starcie projektu musi go skonfigurować, żaden inny user
+ * @param  {[type]} req      [description]
+ * @param  {[type]} res){} [description]
+ * @return {[type]}          [description]
+ */
+router.post("/projects/configure", function(req, res){
+	if(req.user === null)return res.sendData(401, {message : "NO_TOKEN"});
+	if(req.user.type === "SUPER")return res.sendData(403, {message : "NO_AUTHORIZATION"});
+	req.checkBody('project_id', 'INVALID_FIELD').isId();
+	req.checkBody('start_date', 'INVALID_FIELD').isDate();
+	req.checkBody('finish_date', 'INVALID_FIELD').isDate();
+	req.sanitize('start_date').toDate();
+	req.sanitize('finish_date').toDate();
+	req.sanitize('investor_firmname').escape();
+	var projectId = req.body.project_id;
+	var errors = req.validationErrors();
+	if (errors) {
+		return res.sendValidationError({name : "ExpressValidationError", errors :errors});
+	}
+	req.app.get("actions").projects.findLeader(projectId,
+	function(err, projectData){
+		if(err !== null){
+			return res.sendValidationError(err);
+		}
+		if(projectData === null){
+			return res.sendValidationError({name : "AwProccessError", type : "WRONG_VALUE"});
+		}
+		if(projectData['ProjectAccounts.Account.id'] !== req.user.AccountId){
+			return res.sendValidationError({name : "AwProccessError", type : "WRONG_VALUE"});
+		}
+		req.app.get("actions").projects.configure({
+			ProjectId : req.body.project_id,
+			start_date : req.body.start_date,
+			finish_date : req.body.finish_date,
+			investor_firmname : req.body.investor_firmname,
+		}, function(err, ProjectId){
+			if(err !== null){
+				return res.sendValidationError(err);
+			}
+			return res.sendData(200, {id: ProjectId});
+		});
+	});
+});
+// router.post("/projects/paymant", function(req, res){
+// 	if(req.user === null)return res.sendData(401, {message : "NO_TOKEN"});
+// 	if(req.user.type !== "SUPER")return res.sendData(403, {message : "NO_AUTHORIZATION"});
+// 	req.checkBody('project_id', 'INVALID_FIELD').isId();
+// 	req.checkBody('paid_to', 'INVALID_FIELD').isDate();
+// 	req.sanitize('paid_to').toDate();
+// 	var projectId = req.body.project_id;
+// 	var errors = req.validationErrors();
+// 	if (errors) {
+// 		return res.sendValidationError({name : "ExpressValidationError", errors :errors});
+// 	}
+
+// });
+// router.post("/projects/status", function(req, res){
+
+
+// });
 module.exports = router;

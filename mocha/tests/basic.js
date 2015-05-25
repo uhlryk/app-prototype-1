@@ -6,7 +6,6 @@ var expect = chai.expect;
 var debug = require('debug')('test');
 var request = require('superagent');
 var url = 'http://localhost:' + config.app.port;
-var helper = require("../helper.js")(url);
 
 /**
  * podstawowe testy, czy serwer działa i logowanie
@@ -14,6 +13,7 @@ var helper = require("../helper.js")(url);
 describe("Basic test: ", function(){
 	//TODO: spróbować zepsuć token tak by walidator bazy się odpalił, może z wysłaniem pustego tokena, albo bardzo długiego?
 	var server;
+	var helper = require("../helper.js")(server, url);
 	before(function(done){
 		server = serverBuilder(config, done);
 	});

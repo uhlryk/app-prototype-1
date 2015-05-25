@@ -5,7 +5,7 @@ chai.use(require('chai-things'));
 var expect = chai.expect;
 var debug = require('debug')('test');
 var request = require('superagent');
-module.exports = function(url){
+module.exports = function(server, url){
 	return {
 		loginAdmin : function(login, password, cb){
 			request.post(url + "/tokens")
@@ -66,6 +66,20 @@ module.exports = function(url){
 				expect(res.status).to.be.equal(200);
 				expect(res.body.login).to.be.a("string");
 				cb(res.body.login);
+			});
+		},
+		createProject : function(profileAdminToken, profileId, packageName, projectName, phone, cb){
+			request.post(url + "/projects")
+			.set('access-token', profileAdminToken)
+			.send({name : projectName})
+			.send({package : packageName})
+			.send({profile_id : profileId})
+			.send({phone : "+48791111111"})
+			.end(function(err, res){
+				expect(res.status).to.be.equal(200);
+				expect(res.body.login).to.be.a("string");
+				expect(res.body.id).to.be.above(0);
+				cb(res.body.login, res.body.id);
 			});
 		},
 		/**

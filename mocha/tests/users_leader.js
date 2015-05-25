@@ -9,14 +9,14 @@ var url = 'http://localhost:' + config.app.port;
 /**
  * testy związane z dodawaniem, wyświetlaniem profilu
  */
-describe("Create and accept normal user test: ", function(){
+describe("Leader test: ", function(){
 	var server;
 	var helper = require("../helper.js")(server, url);
 	before(function(done){
 		server = serverBuilder(config, done);
 	});
-	describe("Project leader and profileAdmin are logged", function(){
-		var superUserToken, profileId, profileAdminLogin, profileAdminToken, leaderLogin, projectId, leaderToken;
+	describe("Project and leader are created", function(){
+		var superUserToken, profileId, profileAdminLogin, profileAdminToken, leaderLogin, leaderPassword, projectId, leaderToken;
 		before(function(done){
 			helper.loginAdmin(config.adminAuth.login, config.adminAuth.pass, function(token){
 				superUserToken = token;
@@ -31,8 +31,10 @@ describe("Create and accept normal user test: ", function(){
 								leaderLogin = login;
 								projectId = id;
 								var smsData = server.getSmsDebug(login);
-								helper.loginUser(leaderLogin, smsData.password, function(token){
+								leaderPassword = smsData.password;
+								helper.loginUser(leaderLogin, leaderPassword, function(token){
 									leaderToken = token;
+									done();
 								});
 							});
 						});
@@ -40,11 +42,30 @@ describe("Create and accept normal user test: ", function(){
 				});
 			});
 		});
-		// describe("Project Leader test", function(){
-		// 	it("should create new", function(done){
+		it("should not allow create profile", function(done){
+			request.post(url + "/profiles")
+			.set('access-token', leaderToken)
+			.send({firmname : "moja firma która ma jakąś nazwę jakiej nie pamiętam, ale jest długa"})
+			.end(function(err, res){
+				expect(res.status).to.be.equal(401);
+				expect(res.body.message).to.be.equal("NO_TOKEN");
+				done();
+			});
+		});
+		it("should not allow create project", function(done){
+			request.post(url + "/projects")
+			.set('access-token', leaderToken)
+			.send({name : "projekt o nazwie 1"})
+			.send({package : "BASIC"})
+			.send({profile_id : profileId})
+			.send({phone : "+48791111191"})
+			.end(function(err, res){
+				expect(res.status).to.be.equal(403);
+				expect(res.body.message).to.be.equal("NO_AUTHORIZATION");
+				done();
+			});
+		});
 
-		// 	});
-		// });
 	});
 	after(function(done){
 		server.close();

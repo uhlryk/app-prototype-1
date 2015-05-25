@@ -7,8 +7,8 @@
 module.exports = function(sequelize, DataTypes) {
 	var Project = sequelize.define("Project",{
 		status: {
-			type: DataTypes.ENUM('ACTIVE', 'DISABLE'),
-			defaultValue:'ACTIVE',
+			type: DataTypes.ENUM('INIT','ACTIVE', 'DISABLE'),
+			defaultValue:'INIT',
 			allowNull: false
 		},
 		package: {
@@ -35,7 +35,12 @@ module.exports = function(sequelize, DataTypes) {
 		},
 		paid_to: {
 			type: DataTypes.DATE,
+			allowNull : true,
 		},
+		investor_firmname : {
+			type : DataTypes.STRING(50),
+			allowNull : true,
+		}
 	}, {
 		paranoid: true,
 		freezeTableName: true,

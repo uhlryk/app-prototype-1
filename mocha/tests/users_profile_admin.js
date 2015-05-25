@@ -6,12 +6,12 @@ var expect = chai.expect;
 var debug = require('debug')('test');
 var request = require('superagent');
 var url = 'http://localhost:' + config.app.port;
-var helper = require("../helper.js")(url);
 /**
  * testy związane z dodawaniem, wyświetlaniem profilu
  */
 describe("Create profile admin test: ", function(){
 	var server;
+	var helper = require("../helper.js")(server, url);
 	before(function(done){
 		server = serverBuilder(config, done);
 	});

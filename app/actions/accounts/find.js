@@ -1,7 +1,5 @@
-
-var bcrypt = require('bcrypt');
 /**
- * zwraca obiekt token na podstawie numeru token
+ * zwraca account na podstawie numeru telefonu
  */
 module.exports = function(data, cb, models){
 	return models.Account.find({
@@ -10,11 +8,11 @@ module.exports = function(data, cb, models){
 			status : "ACTIVE"
 		}
 	}, {raw:true})
-	.then(function(accountData){
-		if(accountData === null){
+	.then(function(accountModel){
+		if(accountModel === null){
 			cb(null, null);
 		}else {
-			cb(null, accountData);
+			cb(null, accountModel);
 		}
 	});
 };

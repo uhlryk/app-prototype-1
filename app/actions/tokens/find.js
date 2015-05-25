@@ -1,5 +1,3 @@
-
-var bcrypt = require('bcrypt');
 /**
  * zwraca obiekt token na podstawie numeru token
  */

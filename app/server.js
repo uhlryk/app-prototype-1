@@ -10,7 +10,7 @@ module.exports = function(config, callback) {
 	var debug = require('debug')('server');
 	var validationErrorParser = require("./libs/validationErrorParser");
 	var smsManager = require("./libs/smsManager");
-
+	var expressValidator = require('express-validator');
 	var app = express();
 	app.use(favicon(__dirname + '/../public/favicon.ico'));
 	app.use(logger('dev', {
@@ -18,6 +18,10 @@ module.exports = function(config, callback) {
 	}));
 	app.use(bodyParser.json());
 	app.use(bodyParser.urlencoded({extended: true}));
+	app.use(expressValidator({
+		customValidators: require("./libs/validatorList.js").validators,
+		customSanitizers : require("./libs/validatorList.js").sanitizers,
+	}));
 	app.use(function (req, res, next) {
 		res.header('Access-Control-Allow-Origin', "*");
 		res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');

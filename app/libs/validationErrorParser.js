@@ -30,6 +30,21 @@ module.exports = function(errorObject) {
 		} else {
 			return validationMessage;
 		}
+	} else if(errorObject.name === "ExpressValidationError"){
+		validationMessage.message = "VALIDATION_ERROR";
+		if(errorObject.errors !== null && errorObject.errors.length > 0){
+			validationMessage.errors = [];
+			errorObject.errors.forEach(function(error){
+				var newError = {};
+				newError.type = error.msg;
+				newError.field = error.param;
+				validationMessage.errors.push(newError);
+			});
+			return validationMessage;
+		} else {
+			return validationMessage;
+		}
+
 	} else if(errorObject.name === "AwValidationError"){
 		validationMessage.message = "VALIDATION_ERROR";
 		validationMessage.errors = errorObject.errors;
