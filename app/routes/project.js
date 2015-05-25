@@ -16,15 +16,15 @@ router.post("/projects", function(req, res){
 
 	var profileId = Number(req.body.profile_id);//do jakiego profilu firmy jest ten user - zastosowanie tylko dla profile_admin
 	if(Number.isNaN(profileId) || profileId <=0 )return res.sendValidationError({name : "AwValidationError", errors :[{type : "REQUIRE_FIELD", field:"profile_id"}]});
+	if(req.body.phone === undefined || req.body.phone === "")return res.sendValidationError({name : "AwValidationError", errors :[{type : "REQUIRE_FIELD", field:"phone"}]});
 	var phoneValid = phone(req.body.phone);
-	if(phoneValid[0] === null){
+	if(phoneValid[0] === undefined){
 		return res.sendValidationError({name : "AwValidationError", errors :[{type : "WRONG_PHONE", field:"phone"}]});
 	}
 
 	req.app.get("actions").profiles.findShort(profileId,
 	function(err, profileModel){
 		if(err !== null){
-			console.log(err);
 			return res.sendValidationError(err);
 		}
 		if(profileModel.Accounts.indexOf(req.user.AccountId) === -1){//znaczy że dany admin nie administruje profilem dla którego chce zrobić nowego admina
@@ -44,12 +44,26 @@ router.post("/projects", function(req, res){
 			password : generatePassword(12, true),
 		}, function(err, data){
 			if(err !== null){
+				// console.log(err);
 				return res.sendValidationError(err);
 			}
-			return res.sendData(200, {type: data.type, id: data.ProjectId});
+			if(data.sendSMS){
+				req.app.get('sms').send(data.phone, {
+					firstname : data.firstname,
+					lastname : data.lastname,
+					AccountId : data.id,
+					password : data.password,
+					phone : data.phone,
+				}, function(err, message){
+					if(err){
+						//todo: zwrócić jakis błąd gdy sms nie wyjdzie
+					}
+					return res.sendData(200, {login: data.phone, id: data.ProjectId});
+				});
+			} else {
+				return res.sendData(200, {login: data.phone, id: data.ProjectId});
+			}
 		});
-
 	});
-
 });
 module.exports = router;

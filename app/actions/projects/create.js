@@ -6,7 +6,7 @@ var bcrypt = require('bcrypt');
  * @param  {
  *         name : nazwa danego projektu
  *         package: 'BASIC', 'PROFESSIONAL'
- *         profileId?:idprofilu
+ *         profileId:idprofilu
  *
  *         firstname?:string,
  *         lastname?:string,
@@ -38,24 +38,28 @@ module.exports = function(data, cb, models){
 				}, {transaction : t})
 				.then(function(account){
 					modelData = {
-						type : "NEW",
 						AccountId : account.id,
+						firstname : account.firstname,
+						lastname : account.lastname,
 						password : data.password,
 						phone : data.phone,
 						sendSMS : true
 					};
 				});
 			} else if(account.status === 'DISABLE'){
+				//todo:testy gdy lider istnieje ale jest zablokowany
 				throw {name : "AwProccessError", type:"DISABLE_USER"};
 			} else if(account.status === 'INACTIVE'){//znaczy że user był tworzony na potrzeby innego zadania ale jego konto nie zostało aktywowane, bo powstało tylko jako propozycja której nikt nie zatwierdził
+				//test gdy lider istnieje ale jest nieaktywny
 				return account.updateAttributes({
 					status : "ACTIVE",
 					password : bcrypt.hashSync(data.password, 8)
 				}, {transaction : t})
 				.then(function(account){
 					modelData = {
-						type : "CHANGE",
 						AccountId : account.id,
+						firstname : account.firstname,
+						lastname : account.lastname,
 						password : data.password,
 						phone : data.phone,
 						sendSMS : true
@@ -63,7 +67,6 @@ module.exports = function(data, cb, models){
 				});
 			} else if(account.status === 'ACTIVE'){//konto jest w porządku
 				modelData = {
-					type : "OLD",
 					AccountId : account.id,
 					phone : data.phone,
 					sendSMS : false
@@ -73,8 +76,8 @@ module.exports = function(data, cb, models){
 				throw {name : "AwProccessError", type:"OTHER_ERROR"};
 			}
 		})
-		.then(function(account){
-			accountId = account.id;
+		.then(function(){
+			accountId = modelData.AccountId;
 			return models.Project.create({
 				name : data.name,
 				ProfileId : data.ProfileId,

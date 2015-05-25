@@ -15,14 +15,14 @@ router.post("/profile_admin/", function(req, res, next){
 	if(req.user === null)return res.sendData(401, {message : "NO_TOKEN"});
 	var profileId = Number(req.body.profile_id);//do jakiego profilu firmy jest ten user - zastosowanie tylko dla profile_admin
 	if(Number.isNaN(profileId) || profileId <=0 )return res.sendValidationError({name : "AwValidationError", errors :[{type : "REQUIRE_FIELD", field:"profile_id"}]});
+	if(req.body.phone === undefined || req.body.phone === "")return res.sendValidationError({name : "AwValidationError", errors :[{type : "REQUIRE_FIELD", field:"phone"}]});
 	var phoneValid = phone(req.body.phone);
-	if(phoneValid[0] === null){
+	if(phoneValid[0] === undefined){
 		return res.sendValidationError({name : "AwValidationError", errors :[{type : "WRONG_PHONE", field:"phone"}]});
 	}
 	req.app.get("actions").profiles.findShort(profileId,
 	function(err, profileModel){
 		if(err !== null){
-			console.log(err);
 			return res.sendValidationError(err);
 		}
 		if(req.user.type === "USER"){
@@ -44,7 +44,6 @@ router.post("/profile_admin/", function(req, res, next){
 			}
 			if(accountData.sendSMS){
 				req.app.get('sms').send(accountData.phone, {
-					type : "NEW_USER_CREATE",//NEW_USER_PROPOSITION, CHANGE_USER, OLD_USER
 					firstname : accountData.firstname,
 					lastname : accountData.lastname,
 					AccountId : accountData.id,

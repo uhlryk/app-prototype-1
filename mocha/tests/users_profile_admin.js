@@ -58,6 +58,7 @@ describe("Create profile admin test: ", function(){
 			request.post(url + "/users/profile_admin")
 			.set('access-token', superUserToken)
 			.send({profile_id : 999})
+			.send({phone : "+48791633380"})
 			.end(function(err, res){
 				expect(res.status).to.be.equal(422);
 				expect(res.body.message).to.be.equal("PROCESS_ERROR");
@@ -115,7 +116,7 @@ describe("Create profile admin test: ", function(){
 				.end(function(err, res){
 					expect(res.status).to.be.equal(422);
 					expect(res.body.message).to.be.equal("VALIDATION_ERROR");
-					expect(res.body.errors).to.include.some.property("type", "REQUIRE_FIELD");
+					expect(res.body.errors).to.include.some.property("type", "WRONG_PHONE");
 					done();
 				});
 			});
