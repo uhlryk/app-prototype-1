@@ -34,14 +34,14 @@ module.exports = function(config){
 			 *  akcja jest function(config, cb, models) a używamy
 			 *  function(config, cb)
 			 */
-
+			/**
+			 * akcje _action zwracają promise, ogólnie to samo co w callback
+			 * @type {[type]}
+			 */
 			var _action = require(path.join(actionPath, file));
 			actions[controller][fileName] = function(c, cb){
-				// console.log("run action: " + controller + ":" + fileName);
-				_action(c, cb, config.models);
+				return _action(c, cb, config.models, actions);
 			};
-				// console.log("Actions " + controller + " " + fileName);
-
 		});
 	});
 	return actions;

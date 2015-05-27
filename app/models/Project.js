@@ -7,8 +7,8 @@
 module.exports = function(sequelize, DataTypes) {
 	var Project = sequelize.define("Project",{
 		status: {
-			type: DataTypes.ENUM('INIT','ACTIVE', 'DISABLE'),
-			defaultValue:'INIT',
+			type: DataTypes.ENUM('ACTIVE', 'DISABLE'),
+			defaultValue:'ACTIVE',
 			allowNull: false
 		},
 		package: {
@@ -17,8 +17,8 @@ module.exports = function(sequelize, DataTypes) {
 			allowNull: false
 		},
 		mode : {// w jakim jesteśmy trybie, budowy czy serwisu
-			type: DataTypes.ENUM('BUILD', 'SERVICE'),
-			defaultValue:'BUILD',
+			type: DataTypes.ENUM('INIT', 'BUILD', 'SERVICE', 'FINISH'),
+			defaultValue:'INIT',
 			allowNull: false
 		},
 		name : {
@@ -33,12 +33,16 @@ module.exports = function(sequelize, DataTypes) {
 		finish_date : {
 			type: DataTypes.DATE
 		},
-		paid_to: {
+		paid_date: {//oznacza datę do której projekt jest opłacony
 			type: DataTypes.DATE,
 			allowNull : true,
 		},
 		investor_firmname : {
 			type : DataTypes.STRING(50),
+			allowNull : true,
+		},
+		warranty : {
+			type : DataTypes.INTEGER,
 			allowNull : true,
 		}
 	}, {

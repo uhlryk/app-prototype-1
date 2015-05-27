@@ -202,6 +202,75 @@ describe("Create project test: ", function(){
 					done();
 				});
 			});
+			it("should not superadmin set paid date to project when paid_date is wrong", function(done){
+				request.post(url + "/projects/paymant")
+				.set('access-token', superUserToken)
+				.send({"project_id":projectId})
+				.send({"paid_date": "2014--01"})
+				.end(function(err, res){
+					expect(res.status).to.be.equal(422);
+					expect(res.body.message).to.be.equal("VALIDATION_ERROR");
+					expect(res.body.errors).to.include.some.property("type", "INVALID_FIELD");
+					done();
+				});
+			});
+			it("should not superadmin set paid date to project when paid_date is not send", function(done){
+				request.post(url + "/projects/paymant")
+				.set('access-token', superUserToken)
+				.send({"project_id":projectId})
+				.end(function(err, res){
+					expect(res.status).to.be.equal(422);
+					expect(res.body.message).to.be.equal("VALIDATION_ERROR");
+					expect(res.body.errors).to.include.some.property("type", "INVALID_FIELD");
+					done();
+				});
+			});
+			it("should superadmin change status to project", function(done){
+				request.post(url + "/projects/status")
+				.set('access-token', superUserToken)
+				.send({"project_id":projectId})
+				.send({"status": "ACTIVE"})
+				.end(function(err, res){
+					expect(res.status).to.be.equal(200);
+					expect(res.body.id).to.be.above(0);
+					done();
+				});
+			});
+			it("should not superadmin change status project when status is wrong", function(done){
+				request.post(url + "/projects/status")
+				.set('access-token', superUserToken)
+				.send({"project_id":projectId})
+				.send({"status": "SOME_STATUS"})
+				.end(function(err, res){
+					expect(res.status).to.be.equal(422);
+					expect(res.body.message).to.be.equal("VALIDATION_ERROR");
+					expect(res.body.errors).to.include.some.property("type", "FIELD_VALIDATION_FAILED");
+					done();
+				});
+			});
+			it("should not superadmin change status project when project not exist", function(done){
+				request.post(url + "/projects/status")
+				.set('access-token', superUserToken)
+				.send({"project_id":"999"})
+				.send({"status": "ACTIVE"})
+				.end(function(err, res){
+					expect(res.status).to.be.equal(422);
+					expect(res.body.message).to.be.equal("PROCESS_ERROR");
+					expect(res.body.type).to.be.equal("INVALID_PROJECT");
+					done();
+				});
+			});
+			it("should superadmin set paid date to project", function(done){
+				request.post(url + "/projects/paymant")
+				.set('access-token', superUserToken)
+				.send({"project_id":projectId})
+				.send({"paid_date": "2014-03-01"})
+				.end(function(err, res){
+					expect(res.status).to.be.equal(200);
+					expect(res.body.id).to.be.above(0);
+					done();
+				});
+			});
 // todo: mamy kilku adminów i jeden próbuje inicjować projekt innego
 			describe("Leader is login, configure projekt", function(){
 				before(function(done){
@@ -210,7 +279,7 @@ describe("Create project test: ", function(){
 						done();
 					});
 				});
-				it("should not configure project if there is no start_date and finish_date send", function(done){
+				it("should not configure project when there is no start_date and finish_date send", function(done){
 					request.post(url + "/projects/configure")
 					.set('access-token', leaderToken)
 					.send({"project_id": "999"})
@@ -221,7 +290,7 @@ describe("Create project test: ", function(){
 						done();
 					});
 				});
-				it("should not configure project if project not exist", function(done){
+				it("should not configure project when project not exist", function(done){
 					request.post(url + "/projects/configure")
 					.set('access-token', leaderToken)
 					.send({"project_id": "999"})
@@ -234,7 +303,44 @@ describe("Create project test: ", function(){
 						done();
 					});
 				});
-				it("should configure project and make it active", function(done){
+				it("should not configure project when start_date is not send", function(done){
+					request.post(url + "/projects/configure")
+					.set('access-token', leaderToken)
+					.send({"project_id": projectId})
+					.send({"finish_date": "2013-05-01"})
+					.end(function(err, res){
+						expect(res.status).to.be.equal(422);
+						expect(res.body.message).to.be.equal("VALIDATION_ERROR");
+						expect(res.body.errors).to.include.some.property("type", "INVALID_FIELD");
+						done();
+					});
+				});
+				it("should not configure project when finish_date is not send", function(done){
+					request.post(url + "/projects/configure")
+					.set('access-token', leaderToken)
+					.send({"project_id": projectId})
+					.send({"start_date": "2013-05-01"})
+					.end(function(err, res){
+						expect(res.status).to.be.equal(422);
+						expect(res.body.message).to.be.equal("VALIDATION_ERROR");
+						expect(res.body.errors).to.include.some.property("type", "INVALID_FIELD");
+						done();
+					});
+				});
+				it("should not configure project when finish_date is lower then start_date", function(done){
+					request.post(url + "/projects/configure")
+					.set('access-token', leaderToken)
+					.send({"project_id": projectId})
+					.send({"start_date": "2013-07-01"})
+					.send({"finish_date": "2013-05-01"})
+					.end(function(err, res){
+						expect(res.status).to.be.equal(422);
+						expect(res.body.message).to.be.equal("VALIDATION_ERROR");
+						expect(res.body.errors).to.include.some.property("type", "REQUIRE_DATE_GREATER");
+						done();
+					});
+				});
+				it("should configure project and make it BUILD mode", function(done){
 					request.post(url + "/projects/configure")
 					.set('access-token', leaderToken)
 					.send({"project_id":projectId})
@@ -247,7 +353,7 @@ describe("Create project test: ", function(){
 						done();
 					});
 				});
-				it("should not configure project if it is Active", function(done){
+				it("should not configure project when it is not INIT mode", function(done){
 					request.post(url + "/projects/configure")
 					.set('access-token', leaderToken)
 					.send({"project_id":projectId})
@@ -265,6 +371,75 @@ describe("Create project test: ", function(){
 							expect(res.status).to.be.equal(422);
 							expect(res.body.message).to.be.equal("PROCESS_ERROR");
 							expect(res.body.type).to.be.equal("INVALID_PROJECT");
+							done();
+						});
+					});
+				});
+				it("should not set paid date to project- super admin only", function(done){
+					request.post(url + "/projects/paymant")
+					.set('access-token', leaderToken)
+					.send({"project_id":projectId})
+					.send({"paid_date": "2014-03-01"})
+					.end(function(err, res){
+						expect(res.status).to.be.equal(403);
+						expect(res.body.message).to.be.equal("NO_AUTHORIZATION");
+						done();
+					});
+				});
+				it("should not change status to project- super admin only", function(done){
+					request.post(url + "/projects/status")
+					.set('access-token', leaderToken)
+					.send({"project_id":projectId})
+					.send({"status": "ACTIVE"})
+					.end(function(err, res){
+						expect(res.status).to.be.equal(403);
+						expect(res.body.message).to.be.equal("NO_AUTHORIZATION");
+						done();
+					});
+				});
+				it("should change mode from BUILD to SERVICE", function(done){
+					request.post(url + "/projects/mode/service")
+					.set('access-token', leaderToken)
+					.send({"project_id":projectId})
+					.send({"warranty": 10})
+					.send({"is_new_leader": true})
+					.send({phone : "+48791881116"})
+					.end(function(err, res){
+						console.log(res.body);
+						expect(res.status).to.be.equal(200);
+						done();
+					});
+				});
+				describe("project is DISABLE", function(){
+					before(function(done){
+						request.post(url + "/projects/status")
+						.set('access-token', superUserToken)
+						.send({"project_id":projectId})
+						.send({"status": "DISABLE"})
+						.end(function(err, res){
+							done();
+						});
+					});
+					it("should not configure project", function(done){
+						request.post(url + "/projects/configure")
+						.set('access-token', leaderToken)
+						.send({"project_id":projectId})
+						.send({"start_date": "2013-04-01"})
+						.send({"finish_date": "2013-06-01"})
+						.send({"investor_firmname": "inwestor testowy"})
+						.end(function(err, res){
+							expect(res.status).to.be.equal(422);
+							expect(res.body.message).to.be.equal("PROCESS_ERROR");
+							expect(res.body.type).to.be.equal("INVALID_PROJECT");
+							done();
+						});
+					});
+					after(function(done){
+						request.post(url + "/projects/status")
+						.set('access-token', superUserToken)
+						.send({"project_id":projectId})
+						.send({"status": "ACTIVE"})
+						.end(function(err, res){
 							done();
 						});
 					});

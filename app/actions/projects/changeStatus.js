@@ -1,22 +1,13 @@
 /**
- * po utworzeniu projektu określony typ użytkownika moze go skonfigurować
- * @param  {[type]}   data   [description]
- * @param  {Function} cb     [description]
- * @param  {[type]}   models [description]
- * @return {[type]}          [description]
+ * superadmin może ustawić by projekt był aktywny lub zablokowany
  */
 module.exports = function(data, cb, models){
 	models.sequelize.transaction().then(function (t) {
 		return models.Project.update({
-			start_date : data.start_date,
-			finish_date : data.finish_date,
-			investor_firmname : data.investor_firmname,
-			mode : 'BUILD'
+			status : data.status,
 		},{
 			where : {
 				id : data.ProjectId,
-				status : 'ACTIVE',
-				mode : 'INIT'
 			},
 			transaction : t
 		})

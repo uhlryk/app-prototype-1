@@ -6,6 +6,9 @@ module.exports.validators = {
 		var id = Number(value);
 		return Number.isNaN(id) === false && id > 0 ;
 	},
+	isDateGreaterThen :function(value, compare){
+		return value > compare;
+	}
 };
 var phone = require('phone');
 module.exports.sanitizers = {
