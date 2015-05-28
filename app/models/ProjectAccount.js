@@ -1,18 +1,12 @@
-/**
- *
- * @param {Sequelize}sequelize
- * @param DataTypes
- * @returns {*|{}|Model|Model<TInstance, TPojo>}
- */
 module.exports = function(sequelize, DataTypes) {
 	var ProjectAccount = sequelize.define("ProjectAccount",{
 		status: {
-			type: DataTypes.ENUM('INACTIVE', 'ACTIVE', 'DISABLE', 'DELETE'),
-			defaultValue:'INACTIVE',
+			type: DataTypes.ENUM('PROPOSITION', 'ACTIVE', 'DISABLE'),
+			defaultValue:'PROPOSITION',
 			allowNull: false
 		},
 		role: {
-			type: DataTypes.ENUM('PROJECT_LEADER', 'COWORKER', 'INVESTOR', 'INSPECTOR', 'DESIGNER', 'SUBCONTRACTOR'),
+			type: DataTypes.ENUM('PROFILE_ADMIN' ,'PROJECT_LEADER', 'COWORKER', 'INVESTOR', 'INSPECTOR', 'DESIGNER', 'SUBCONTRACTOR'),
 			allowNull: false
 		},
 	}, {
@@ -21,6 +15,7 @@ module.exports = function(sequelize, DataTypes) {
 		classMethods: {
 			associate: function (models) {
 				ProjectAccount.belongsTo(models.Account);
+				// ProjectAccount.belongsTo(models.Account, {as: 'PropositionAuthor'});
 				ProjectAccount.belongsTo(models.Project);
 			}
 		}

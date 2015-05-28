@@ -12,7 +12,7 @@ module.exports = function(sequelize, DataTypes) {
 		 * logować można się tylko na kotno ACTIVE
 		 */
 		status: {
-			type: DataTypes.ENUM('INACTIVE','ACTIVE', 'DISABLE'),
+			type: DataTypes.ENUM('PROPOSITION','ACTIVE', 'DISABLE'),
 			defaultValue:'ACTIVE',
 			allowNull: false
 		},
@@ -40,18 +40,13 @@ module.exports = function(sequelize, DataTypes) {
 			type: DataTypes.STRING(15),
 			allowNull: false
 		},
-		passwordToChange : {
-			type : DataTypes.BOOLEAN,
-			allowNull : false,
-			defaultValue:true,
-		},
-
 	}, {
 		paranoid: true,
 		freezeTableName: true,
 		classMethods: {
 			associate: function (models) {
 				Account.hasMany(models.ProjectAccount);
+				// Account.hasMany(models.ProjectAccount, {as:'PropositionAuthor'});
 				Account.belongsTo(models.Profile);
 			}
 		}

@@ -7,16 +7,17 @@
  * data.lastname
  * data.email
  * data.password
+ * data.status 'ACTIVE','PROPOSITION' czyli czy tworzymy użytkownika czy tylko go proponujemy, domyślnie baza odpali 'ACTIVE'
  */
 
 var bcrypt = require('bcrypt');
 module.exports = function(data, cb, models, actions){
 	if(data.transaction){
-		return model(data, t, models);
+		return model(data, t, models, actions);
 	} else {
 		return models.sequelize.transaction()
 		.then(function (t) {
-			return model(data, t, models)
+			return model(data, t, models, actions)
 			.then(function(result){
 				t.commit();
 				return new Promise(function(resolve) {
@@ -33,8 +34,8 @@ module.exports = function(data, cb, models, actions){
 function model(data, cb, models, actions){
 	var transaction = data.transaction;
 	/**
-	 * określamy co zostało zrobione z kontem, CREATE_NEW, INACTIVE, ACTIVE, może się to przydać do kolejnych operacji
-	 * np jeśli było INACTIVE i ACTIVE to należy sprawdzić czy już w danym projekcie nie pełni jakiś ról
+	 * określamy co zostało zrobione z kontem, CREATE_NEW, PROPOSITION, ACTIVE, może się to przydać do kolejnych operacji
+	 * np jeśli było PROPOSITION i ACTIVE to należy sprawdzić czy już w danym projekcie nie pełni jakiś ról
 	 */
 	var operation;
 	var accountModel;
@@ -44,19 +45,22 @@ function model(data, cb, models, actions){
 		}
 	}, {transaction : transaction})
 	.then(function(account){
-		throw {name : "AwProccessError", type:"OTHER_ERROR"};
 		if(account === null){
-			/**
-			 * oznacza że nie ma dla danegu telefonu konta, musimy więc utworzyć nowe konto
-			 */
-			operation = 'CREATE_NEW';
-			return models.Account.create({
+			var modelData = {
 				firstname : data.firstname,
 				lastname : data.lastname,
 				email : data.email,
 				phone : data.phone,
 				password : bcrypt.hashSync(data.password, 8)
-			}, {transaction : transaction})
+			};
+			if(data.status){
+				modelData.status = data.status;
+			}
+			/**
+			 * oznacza że nie ma dla danegu telefonu konta, musimy więc utworzyć nowe konto
+			 */
+			operation = 'CREATE_NEW';
+			return models.Account.create(modelData, {transaction : transaction})
 			.then(function(account){
 				accountModel  = account;
 			});
@@ -66,7 +70,7 @@ function model(data, cb, models, actions){
 				/**
 				 * znaczy że konto już istnieje. Musimy więc sprawdzić czy w danym projekcie konto
 				 * ma już jakieś role PROJECT_ACCOUNT dla tego projektu (rola ProfileAdmin się tu nie pojawi).
-				 * jeśli ma role INACTIVE to je ustawiamy na DELETE
+				 * jeśli ma role PROPOSITION to je ustawiamy na DELETE
 				 * jeśli ma role inne niż COWORKER to trow error
 				 * Jeśli był to COWORKER to zamieniamy na PROJECT_LEADER
 				 * PROJECT_ACCOUNT może być równocześnie PROJECT_LEADER
@@ -74,9 +78,9 @@ function model(data, cb, models, actions){
 				 * Należy pamiętać by w projekcie był zawsze leader. I by był jeden leader.
 				 * Proces musi iść w transakcji z równoczesnym usunięciem leadera z projektu
 				 */
-		} else if(account.status === 'INACTIVE'){
+		} else if(account.status === 'PROPOSITION'){
 			accountModel = account;
-			operation = 'INACTIVE';
+			operation = 'PROPOSITION';
 		} else if(account.status === 'ACTIVE'){
 			accountModel = account;
 			operation = 'ACTIVE';

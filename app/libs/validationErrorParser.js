@@ -30,6 +30,10 @@ module.exports = function(errorObject) {
 		} else {
 			return validationMessage;
 		}
+	} else if(errorObject.name === "SequelizeForeignKeyConstraintError"){
+		validationMessage.message = "PROCESS_ERROR";
+		validationMessage.type = "FOREIGN_KEY_CONSTRAINT";
+		return validationMessage;
 	} else if(errorObject.name === "ExpressValidationError"){
 		validationMessage.message = "VALIDATION_ERROR";
 		if(errorObject.errors !== null && errorObject.errors.length > 0){

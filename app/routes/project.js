@@ -183,17 +183,21 @@ router.post("/projects/mode/service", function(req, res){
 	if (errors) {
 		return res.sendValidationError({name : "ExpressValidationError", errors :errors});
 	}
-	req.app.get("actions").accounts.create({
+	req.app.get("actions").projectAccounts.createRole({
 		phone : req.body.phone,
 		firstname : req.body.firstname,
 		lastname : req.body.lastname,
 		email : req.body.email,
-		password : generatePassword(12, true)
+		password : generatePassword(12, true),
+		projectId : projectId,
+		role : 'PROJECT_LEADER',
+		status: 'ACTIVE',
 	})
 	.then(function(data){
 		return res.sendData(200, data);
 	})
 	.catch(function (err) {
+		console.log(err);
 		return res.sendValidationError(err);
 	});
 	// req.app.get("actions").projects.setServiceMode({
