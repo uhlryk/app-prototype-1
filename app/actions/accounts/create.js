@@ -8,6 +8,8 @@
  * data.email
  * data.password
  * data.status 'ACTIVE','PROPOSITION' czyli czy tworzymy użytkownika czy tylko go proponujemy, domyślnie baza odpali 'ACTIVE'
+ * return
+ * {model: accountModel, operation: [CREATE_NEW | PROPOSITION | ACTIVE]}
  */
 
 var bcrypt = require('bcrypt');
@@ -67,17 +69,6 @@ function model(data, cb, models, actions){
 		} else if(account.status === 'DISABLE'){//konto istnieje ale jest zablokowane
 			//todo:testy gdy lider istnieje ale jest zablokowany
 			throw {name : "AwProccessError", type:"DISABLE_USER"};
-				/**
-				 * znaczy że konto już istnieje. Musimy więc sprawdzić czy w danym projekcie konto
-				 * ma już jakieś role PROJECT_ACCOUNT dla tego projektu (rola ProfileAdmin się tu nie pojawi).
-				 * jeśli ma role PROPOSITION to je ustawiamy na DELETE
-				 * jeśli ma role inne niż COWORKER to trow error
-				 * Jeśli był to COWORKER to zamieniamy na PROJECT_LEADER
-				 * PROJECT_ACCOUNT może być równocześnie PROJECT_LEADER
-				 * UWAGA:
-				 * Należy pamiętać by w projekcie był zawsze leader. I by był jeden leader.
-				 * Proces musi iść w transakcji z równoczesnym usunięciem leadera z projektu
-				 */
 		} else if(account.status === 'PROPOSITION'){
 			accountModel = account;
 			operation = 'PROPOSITION';

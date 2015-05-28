@@ -38,7 +38,10 @@ describe("project Change mode to service test: ", function(){
 									projectId = id;
 									var smsData = server.getSmsDebug(login);
 									leaderPassword = smsData.password;
-									done();
+									helper.loginUser(leaderLogin, leaderPassword, function(token){
+										leaderToken = token;
+										done();
+									});
 								});
 							});
 						});
@@ -46,54 +49,70 @@ describe("project Change mode to service test: ", function(){
 				});
 			});
 		});
-		describe("Leader is login, configure projekt", function(){
+		it("should not change mode from BUILD to SERVICE when project not exists", function(done){
+			request.post(url + "/projects/mode/service")
+			.set('access-token', leaderToken)
+			.send({"project_id":999})
+			.send({"warranty": 10})
+			.send({"is_new_leader": true})
+			.send({phone : "+48791881116"})
+			.end(function(err, res){
+				expect(res.status).to.be.equal(422);
+				expect(res.body.message).to.be.equal("PROCESS_ERROR");
+				expect(res.body.type).to.be.equal("INVALID_PROJECT");
+				done();
+			});
+		});
+		it("should not change mode from BUILD to SERVICE when is_new_leader but not phone", function(done){
+			request.post(url + "/projects/mode/service")
+			.set('access-token', leaderToken)
+			.send({"project_id":999})
+			.send({"warranty": 10})
+			.send({"is_new_leader": true})
+			.end(function(err, res){
+				expect(res.status).to.be.equal(422);
+				expect(res.body.message).to.be.equal("VALIDATION_ERROR");
+				expect(res.body.errors).to.include.some.property("type", "REQUIRE_FIELD");
+				done();
+			});
+		});
+		it("should not change mode from BUILD to SERVICE when is_new_leader but wrong phone", function(done){
+			request.post(url + "/projects/mode/service")
+			.set('access-token', leaderToken)
+			.send({"project_id":999})
+			.send({"warranty": 10})
+			.send({"is_new_leader": true})
+			.send({phone : "+48781116"})
+			.end(function(err, res){
+				expect(res.status).to.be.equal(422);
+				expect(res.body.message).to.be.equal("VALIDATION_ERROR");
+				expect(res.body.errors).to.include.some.property("type", "REQUIRE_FIELD");
+				done();
+			});
+		});
+		it("should not change mode from BUILD to SERVICE when project is not configure", function(done){
+			request.post(url + "/projects/mode/service")
+			.set('access-token', leaderToken)
+			.send({"project_id":projectId})
+			.send({"warranty": 10})
+			.send({"is_new_leader": true})
+			.send({phone : "+48791881116"})
+			.end(function(err, res){
+				expect(res.status).to.be.equal(422);
+				expect(res.body.message).to.be.equal("PROCESS_ERROR");
+				expect(res.body.type).to.be.equal("INVALID_PROJECT");
+				done();
+			});
+		});
+		describe("project is Configure", function(){
 			before(function(done){
-				helper.loginUser(leaderLogin, leaderPassword, function(token){
-					leaderToken = token;
-					done();
-				});
-			});
-			it("should not change mode from BUILD to SERVICE when project not exists", function(done){
-				request.post(url + "/projects/mode/service")
+				request.post(url + "/projects/configure")
 				.set('access-token', leaderToken)
-				.send({"project_id":999})
-				.send({"warranty": 10})
-				.send({"is_new_leader": true})
-				.send({phone : "+48791881116"})
+				.send({"project_id":projectId})
+				.send({"start_date": "2013-03-01"})
+				.send({"finish_date": "2013-05-01"})
+				.send({"investor_firmname": "inwestor testowy"})
 				.end(function(err, res){
-					console.log(res.body);
-					expect(res.status).to.be.equal(422);
-					expect(res.body.message).to.be.equal("PROCESS_ERROR");
-					expect(res.body.type).to.be.equal("INVALID_PROJECT");
-					done();
-				});
-			});
-			it("should not change mode from BUILD to SERVICE when is_new_leader but not phone", function(done){
-				request.post(url + "/projects/mode/service")
-				.set('access-token', leaderToken)
-				.send({"project_id":999})
-				.send({"warranty": 10})
-				.send({"is_new_leader": true})
-				.end(function(err, res){
-					console.log(res.body);
-					expect(res.status).to.be.equal(422);
-					expect(res.body.message).to.be.equal("VALIDATION_ERROR");
-					expect(res.body.errors).to.include.some.property("type", "REQUIRE_FIELD");
-					done();
-				});
-			});
-			it("should not change mode from BUILD to SERVICE when is_new_leader but wrong phone", function(done){
-				request.post(url + "/projects/mode/service")
-				.set('access-token', leaderToken)
-				.send({"project_id":999})
-				.send({"warranty": 10})
-				.send({"is_new_leader": true})
-				.send({phone : "+48781116"})
-				.end(function(err, res){
-					console.log(res.body);
-					expect(res.status).to.be.equal(422);
-					expect(res.body.message).to.be.equal("VALIDATION_ERROR");
-					expect(res.body.errors).to.include.some.property("type", "REQUIRE_FIELD");
 					done();
 				});
 			});
@@ -105,31 +124,28 @@ describe("project Change mode to service test: ", function(){
 				.send({"is_new_leader": true})
 				.send({phone : "+48791881116"})
 				.end(function(err, res){
-					console.log(res.body);
 					expect(res.status).to.be.equal(200);
 					done();
 				});
 			});
-			describe("project is DISABLE", function(){
-				before(function(done){
-					request.post(url + "/projects/status")
-					.set('access-token', superUserToken)
-					.send({"project_id":projectId})
-					.send({"status": "DISABLE"})
-					.end(function(err, res){
-						console.log(res.body);
-						done();
-					});
+		});
+		describe("project is DISABLE", function(){
+			before(function(done){
+				request.post(url + "/projects/status")
+				.set('access-token', superUserToken)
+				.send({"project_id":projectId})
+				.send({"status": "DISABLE"})
+				.end(function(err, res){
+					done();
 				});
-				after(function(done){
-					request.post(url + "/projects/status")
-					.set('access-token', superUserToken)
-					.send({"project_id":projectId})
-					.send({"status": "ACTIVE"})
-					.end(function(err, res){
-						console.log(res.body);
-						done();
-					});
+			});
+			after(function(done){
+				request.post(url + "/projects/status")
+				.set('access-token', superUserToken)
+				.send({"project_id":projectId})
+				.send({"status": "ACTIVE"})
+				.end(function(err, res){
+					done();
 				});
 			});
 		});

@@ -68,6 +68,9 @@ function model(data, cb, models, actions){
 					}
 					//testy ról tego użytkownika w projekcie
 					if(data.accountId === projectAccount.AccountId){//dany user ma w projekcie rolę
+						/**
+						 * Możliwy jest tylko jeden warunek, czyli user ma rolę PROFILE_ADMIN i chce być PROJECT_LEADER, pozostałe się wysypią
+						 */
 						if(projectAccount.role === 'PROFILE_ADMIN' && data.role === 'PROJECT_LEADER'){//jest ok, dany admin może
 						} else {//user ma inną rolę niż PROFILE_ADMIN lub docelowa rola jest inna niż PROJECT_LEADER
 							throw {name : "AwProccessError", type:"DUPLICATE_ACCOUNT_ROLE"};

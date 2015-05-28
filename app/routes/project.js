@@ -183,39 +183,28 @@ router.post("/projects/mode/service", function(req, res){
 	if (errors) {
 		return res.sendValidationError({name : "ExpressValidationError", errors :errors});
 	}
-	req.app.get("actions").projectAccounts.createRole({
-		phone : req.body.phone,
+	req.app.get("actions").projects.setServiceMode({
+		projectId : projectId,
+		warranty : req.body.warranty,
+		isNewLeader : isNewLeader,
+		//tu dane dla lidera
 		firstname : req.body.firstname,
 		lastname : req.body.lastname,
 		email : req.body.email,
+		phone : req.body.phone,
 		password : generatePassword(12, true),
-		projectId : projectId,
-		role : 'PROJECT_LEADER',
-		status: 'ACTIVE',
 	})
 	.then(function(data){
-		return res.sendData(200, data);
+		if(data.accountOperation === 'CREATE_NEW' || data.accountOperation === 'ACTIVE_PROPOSITION'){
+			//wysyłamy sms
+			return res.sendData(200);
+		} else {
+			return res.sendData(200);
+		}
 	})
 	.catch(function (err) {
 		console.log(err);
 		return res.sendValidationError(err);
 	});
-	// req.app.get("actions").projects.setServiceMode({
-	// 	ProjectId : projectId,
-	// 	warranty : req.body.warranty,
-	// 	isNewLeader : isNewLeader,
-	// 	//tu dane dla lidera
-	// 	firstname : req.body.firstname,
-	// 	lastname : req.body.lastname,
-	// 	email : req.body.email,
-	// 	phone : req.body.phone,
-	// 	password : generatePassword(12, true),
-	// }, function(err, ProjectId){
-	// 	if(err !== null){
-	// 		return res.sendValidationError(err);
-	// 	}
-	// 	return res.sendData(200, {id: ProjectId});
-	// });
-
 });
 module.exports = router;
