@@ -17,28 +17,7 @@
  * data.accountId niezbędne pole, do identyfikacji i do utworzenia konta
  */
 
-module.exports = function(data, cb, models, actions){
-	if(data.transaction){
-		return model(data, t, models, actions);
-	} else {
-		return models.sequelize.transaction()
-		.then(function (t) {
-			return model(data, t, models, actions)
-			.then(function(result){
-				t.commit();
-				return new Promise(function(resolve) {
-					resolve(result);
-				});
-			})
-			.catch(function (err) {
-				t.rollback();
-				throw err;
-			});
-		});
-	}
-};
-function model(data, cb, models, actions){
-	var transaction = data.transaction;
+module.exports = function(data, transaction, models, actions){
 	var operation;
 	if(data.status === 'PROPOSITION'){//może być dowolna licza propozycji ról w projekcie więc nie sprawdzamy istniejących
 		return models.ProjectAccount.create({
@@ -88,4 +67,4 @@ function model(data, cb, models, actions){
 			}, {transaction : transaction});
 		});
 	}
-}
+};

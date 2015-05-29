@@ -9,28 +9,7 @@
  * zwraca listę obiektów odpowiadających rolom jakie mogły być usunięte. Obiekty na liście mają strukturę
  * {operation:[DISABLE | NOT_CHANGE_PROFILE_ADMIN], model:projectAccountModel}
  */
-module.exports = function(data, cb, models, actions){
-	if(data.transaction){
-		return model(data, t, models, actions);
-	} else {
-		return models.sequelize.transaction()
-		.then(function (t) {
-			return model(data, t, models, actions)
-			.then(function(result){
-				t.commit();
-				return new Promise(function(resolve) {
-					resolve(result);
-				});
-			})
-			.catch(function (err) {
-				t.rollback();
-				throw err;
-			});
-		});
-	}
-};
-function model(data, cb, models, actions){
-	var transaction = data.transaction;
+module.exports = function(data, transaction, models, actions){
 	var roleList = [];
 	return models.ProjectAccount.findAll({//wszystkie role w projekcie wyciągamy
 		where : {
@@ -60,4 +39,4 @@ function model(data, cb, models, actions){
 			resolve(roleList);
 		});
 	});
-}
+};

@@ -18,51 +18,44 @@ var bcrypt = require('bcrypt');
  * @param  {[type]}   models [description]
  * @return {[type]}          [description]
  */
-module.exports = function(data, cb, models){
+module.exports = function(data, transaction, models, actions){
 	//TODO: zaślepka dla wysyłania telefonu smsem
-	var customerModel;
-	models.sequelize.transaction().then(function (t) {
-		return models.Account.find({
-			where : {
-				phone : data.phone
-			}
-		}, {transaction : t})
-		.then(function(account){
-			if(account === null){//tworzymy nowe konto
-				return models.Account.create({
-					firstname : data.firstname,
-					lastname : data.lastname,
-					email : data.email,
+	return models.Account.find({
+		where : {
+			phone : data.phone
+		}
+	}, {transaction : transaction})
+	.then(function(account){
+		if(account === null){//tworzymy nowe konto
+			return models.Account.create({
+				firstname : data.firstname,
+				lastname : data.lastname,
+				email : data.email,
+				phone : data.phone,
+				ProfileId : data.ProfileId,
+				password : bcrypt.hashSync(data.password, 8)
+			}, {transaction : transaction})
+			.then(function(account){
+				return {
+					firstname : account.firstname,
+					lastname : account.lastname,
+					AccountId : account.id,
+					password : data.password,
 					phone : data.phone,
-					ProfileId : data.ProfileId,
-					password : bcrypt.hashSync(data.password, 8)
-				}, {transaction : t})
-				.then(function(account){
-					return {
-						firstname : account.firstname,
-						lastname : account.lastname,
-						AccountId : account.id,
-						password : data.password,
-						phone : data.phone,
-						sendSMS : true
-					};
-				});
-			} else if(account.AccountId === null){
-			//znaczy że ne jest adminem i sprawdzamy czy w danym profilu ma jakieś role do projektów,
-			//jeśli user będzie miał dodany profil_admina a miał status INACTIVE to należy zmienić go na active i wysłać mu SMS z hasłem
-				/* TODO:  sprawdzić we wszystkich Project mających profileId takie samo jak dane czy istnieje rola tego użytkownika */
-			} else {//znaczy że jest gdzieć adminiem
-				throw {name : "AwProccessError", type:"DUPLICATE_USER"};
-			}
-		})
-		.then(function(accountData){
-			t.commit();
-			cb(null, accountData);
-		})
-		.catch(function (err) {
-			t.rollback();
-			cb(err);
+					sendSMS : true
+				};
+			});
+		} else if(account.AccountId === null){
+		//znaczy że ne jest adminem i sprawdzamy czy w danym profilu ma jakieś role do projektów,
+		//jeśli user będzie miał dodany profil_admina a miał status INACTIVE to należy zmienić go na active i wysłać mu SMS z hasłem
+			/* TODO:  sprawdzić we wszystkich Project mających profileId takie samo jak dane czy istnieje rola tego użytkownika */
+		} else {//znaczy że jest gdzieć adminiem
+			throw {name : "AwProccessError", type:"DUPLICATE_USER"};
+		}
+	})
+	.then(function(accountData){
+		return new Promise(function(resolve) {
+			resolve(accountData);
 		});
 	});
-
 };

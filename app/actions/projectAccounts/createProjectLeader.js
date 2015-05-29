@@ -14,31 +14,9 @@
  * data.password
  * return
  * {model: accountModel, operation: [CREATE_NEW | ACTIVE_PROPOSITION | ACTIVE]}
- *
  */
 
-module.exports = function(data, cb, models, actions){
-	if(data.transaction){
-		return model(data, t, models, actions);
-	} else {
-		return models.sequelize.transaction()
-		.then(function (t) {
-			return model(data, t, models, actions)
-			.then(function(result){
-				t.commit();
-				return new Promise(function(resolve) {
-					resolve(result);
-				});
-			})
-			.catch(function (err) {
-				t.rollback();
-				throw err;
-			});
-		});
-	}
-};
-function model(data, cb, models, actions){
-	var transaction = data.transaction;
+module.exports = function(data, transaction, models, actions){
 	var operation;
 	var accountModel;
 	/**
@@ -64,7 +42,7 @@ function model(data, cb, models, actions){
 					transaction: transaction,
 					projectId: data.projectId,
 					accountId: projectAccount.AccountId,
-				})
+				}, transaction)
 				.then(function(affectedRoleList){
 					if(affectedRoleList === null){//lista musi mieć minimum jeden element, a max 2
 						//błędna sytuacja która nie powinna mieć miejsca nigdy
@@ -84,7 +62,7 @@ function model(data, cb, models, actions){
 							role : 'COWORKER',
 							status: 'ACTIVE',
 							accountId: projectAccount.AccountId
-						});
+						}, transaction);
 					}
 				});
 			});
@@ -103,7 +81,7 @@ function model(data, cb, models, actions){
 			phone : data.phone,
 			password : data.password,
 			status : 'ACTIVE'
-		});
+		}, transaction);
 	})
 	.then(function(resultData){
 		operation = resultData.operation;
@@ -126,11 +104,11 @@ function model(data, cb, models, actions){
 			role : 'PROJECT_LEADER',
 			status: 'ACTIVE',
 			accountId: accountModel.AccountId
-		});
+		}, transaction);
 	})
 	.then(function(){
 		return new Promise(function(resolve) {
 			resolve({model: accountModel, operation: operation});
 		});
 	});
-}
+};

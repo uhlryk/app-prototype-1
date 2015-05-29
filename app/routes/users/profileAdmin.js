@@ -20,13 +20,12 @@ router.post("/profile_admin/", function(req, res, next){
 	if(phoneValid[0] === undefined){
 		return res.sendValidationError({name : "AwValidationError", errors :[{type : "WRONG_PHONE", field:"phone"}]});
 	}
-	req.app.get("actions").profiles.findShort(profileId,
-	function(err, profileModel){
-		if(err !== null){
-			return res.sendValidationError(err);
-		}
+	req.app.get("actions").profiles.findShort({
+		profileId : profileId,
+	})
+	.then(function(profileModel){
 		if(req.user.type === "USER"){
-			if(profileModel.Accounts.indexOf(req.user.AccountId) === -1){//znaczy że dany admin nie administruje profilem dla którego chce zrobić nowego admina
+			if(profileModel.Accounts.indexOf(req.user.accountId) === -1){//znaczy że dany admin nie administruje profilem dla którego chce zrobić nowego admina
 				return res.sendValidationError({name : "AwProccessError", type : "WRONG_VALUE"});
 			}
 			//znaczy że dany admin ma uprawnienia do dodania admina do tego profilu
@@ -38,10 +37,8 @@ router.post("/profile_admin/", function(req, res, next){
 			phone : phoneValid[0],
 			password : generatePassword(12, true),
 			ProfileId : profileId,
-		}, function(err, accountData){
-			if(err !== null){
-				return res.sendValidationError(err);
-			}
+		})
+		.then(function(accountData){
 			if(accountData.sendSMS){
 				req.app.get('sms').send(accountData.phone, {
 					firstname : accountData.firstname,
@@ -58,7 +55,13 @@ router.post("/profile_admin/", function(req, res, next){
 			} else {
 				return res.sendData(200, {login: accountData.phone});
 			}
+		})
+		.catch(function(err){
+			return res.sendValidationError(err);
 		});
+	})
+	.catch(function(err){
+		return res.sendValidationError(err);
 	});
 });
 module.exports = router;

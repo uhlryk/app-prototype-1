@@ -1,18 +1,18 @@
 /**
- * zwraca account na podstawie numeru telefonu
+ * zwraca account na podstawie numeru telefonu. Opcjonalnie możemy podać status. Domyślnie zwraca tylko dla ACTIVE
+ * data.phone
+ * data.status?
  */
-module.exports = function(data, cb, models){
+module.exports = function(data, transaction, models, actions){
 	return models.Account.find({
 		where : {
 			phone : data.phone,
-			status : "ACTIVE"
+			status : data.status?data.status:"ACTIVE"
 		}
-	}, {raw:true})
+	}, {transaction : transaction})
 	.then(function(accountModel){
-		if(accountModel === null){
-			cb(null, null);
-		}else {
-			cb(null, accountModel);
-		}
+		return new Promise(function(resolve) {
+			resolve(accountModel);
+		});
 	});
 };

@@ -23,12 +23,11 @@ router.post("/projects", function(req, res){
 	if (errors) {
 		return res.sendValidationError({name : "ExpressValidationError", errors :errors});
 	}
-	req.app.get("actions").profiles.findShort(profileId,
-	function(err, profileModel){
-		if(err !== null){
-			return res.sendValidationError(err);
-		}
-		if(profileModel.Accounts.indexOf(req.user.AccountId) === -1){//znaczy że dany admin nie administruje profilem dla którego chce zrobić nowego admina
+	req.app.get("actions").profiles.findShort({
+		profileId : profileId,
+	})
+	.then(function(profileModel){
+		if(profileModel.Accounts.indexOf(req.user.accountId) === -1){//znaczy że dany admin nie administruje profilem dla którego chce zrobić nowego admina
 			return res.sendData(403, {message : "NO_AUTHORIZATION"});
 		}
 		//wiemy że mamy do czynienia z adminem danego profilu
@@ -43,10 +42,8 @@ router.post("/projects", function(req, res){
 			email : req.body.email,
 			phone : login,
 			password : generatePassword(12, true),
-		}, function(err, data){
-			if(err !== null){
-				return res.sendValidationError(err);
-			}
+		})
+		.then(function(data){
 			if(data.sendSMS){
 				req.app.get('sms').send(data.phone, {
 					firstname : data.firstname,
@@ -63,7 +60,13 @@ router.post("/projects", function(req, res){
 			} else {
 				return res.sendData(200, {login: data.phone, id: data.ProjectId});
 			}
+		})
+		.catch(function(err){
+			return res.sendValidationError(err);
 		});
+	})
+	.catch(function (err) {
+		return res.sendValidationError(err);
 	});
 });
 /**
@@ -87,124 +90,49 @@ router.post("/projects/configure", function(req, res){
 	if (errors) {
 		return res.sendValidationError({name : "ExpressValidationError", errors :errors});
 	}
-	req.app.get("actions").projects.findLeader(projectId,
-	function(err, projectData){
-		if(err !== null){
-			return res.sendValidationError(err);
-		}
+	//<DOZMIANY>
+	req.app.get("actions").projects.findLeader({
+		projectId: projectId
+	})
+	.then(function(projectData){
 		if(projectData === null){
 			return res.sendValidationError({name : "AwProccessError", type : "WRONG_VALUE"});
 		}
-		if(projectData['ProjectAccounts.Account.id'] !== req.user.AccountId){
+		if(projectData.projectAccounts === null){
 			return res.sendValidationError({name : "AwProccessError", type : "WRONG_VALUE"});
 		}
+		var isUserProjectLeader = false;
+		projectData.toJSON().ProjectAccounts.forEach(function(projectAccounts){
+			if(projectAccounts.Account.id === req.user.accountId){
+				isUserProjectLeader = true;
+			}
+		});
+		if(isUserProjectLeader === false){
+			return res.sendValidationError({name : "AwProccessError", type : "WRONG_VALUE B"});
+		}
+		// </DOZMIANY>
 		req.app.get("actions").projects.configure({
-			ProjectId : req.body.project_id,
+			projectId : req.body.project_id,
 			start_date : req.body.start_date,
 			finish_date : req.body.finish_date,
 			investor_firmname : req.body.investor_firmname,
-		}, function(err, ProjectId){
-			if(err !== null){
-				return res.sendValidationError(err);
-			}
-			return res.sendData(200, {id: ProjectId});
+		})
+		.then(function(projectId){
+			return res.sendData(200, {id: projectId});
+		})
+		.catch(function(err){
+			return res.sendValidationError(err);
 		});
-	});
-});
-router.post("/projects/paymant", function(req, res){
-	if(req.user === null)return res.sendData(401, {message : "NO_TOKEN"});
-	if(req.user.type !== "SUPER")return res.sendData(403, {message : "NO_AUTHORIZATION"});
-	req.checkBody('project_id', 'INVALID_FIELD').isId();
-	req.checkBody('paid_date', 'INVALID_FIELD').isDate();
-	req.sanitize('paid_date').toDate();
-	var projectId = req.body.project_id;
-	var errors = req.validationErrors();
-	if (errors) {
-		return res.sendValidationError({name : "ExpressValidationError", errors :errors});
-	}
-	req.app.get("actions").projects.setPaidDate({
-		ProjectId : projectId,
-		paid_date : req.body.start_date,
-	}, function(err, ProjectId){
-		if(err !== null){
-			return res.sendValidationError(err);
-		}
-		return res.sendData(200, {id: ProjectId});
-	});
-});
-/**
- * super admin może zmieniać status projektu na ACTIVE lub DISABLE
- * wysyłamy postem
- * project_id id projektu
- * status status projektu [ACTIVE | DISABLE]
- */
-router.post("/projects/status", function(req, res){
-	if(req.user === null)return res.sendData(401, {message : "NO_TOKEN"});
-	if(req.user.type !== "SUPER")return res.sendData(403, {message : "NO_AUTHORIZATION"});
-	req.checkBody('project_id', 'INVALID_FIELD').isId();
-	req.checkBody('status', 'REQUIRE_FIELD').notEmpty();
-	var errors = req.validationErrors();
-	if (errors) {
-		return res.sendValidationError({name : "ExpressValidationError", errors :errors});
-	}
-	req.app.get("actions").projects.changeStatus({
-		ProjectId : req.body.project_id,
-		status : req.body.status,
-	}, function(err, ProjectId){
-		if(err !== null){
-			return res.sendValidationError(err);
-		}
-		return res.sendData(200, {id: ProjectId});
-	});
-});
-/**
- * Lider projektu zmienia tryb projektu z budowa na serwis
- * Wskazujemy też nowego lidera lub informujemy że obecny jest liderem
- * wysyłamy postem
- * project_id
- * warranty liczba określająca liczbę miesięcy jakie trwa gwarancja
- * is_new_leader jeśli true to musimy podać przynajmniej telefon nowego lidera
- *
- */
-router.post("/projects/mode/service", function(req, res){
-	//TODO: moduł service
-	if(req.user === null)return res.sendData(401, {message : "NO_TOKEN"});
-	if(req.user.type === "SUPER")return res.sendData(403, {message : "NO_AUTHORIZATION"});
-	req.checkBody('project_id', 'INVALID_FIELD').isId();
-	var projectId = req.body.project_id;
-	req.checkBody('warranty', 'REQUIRE_FIELD').isInt();
-	req.sanitize("is_new_leader").toBoolean();
-	var isNewLeader = req.body.is_new_leader;
-	if(isNewLeader){
-		req.sanitize("phone").normalizePhone();
-		req.checkBody('phone', 'REQUIRE_FIELD').notEmpty();
-	}
-	var errors = req.validationErrors();
-	if (errors) {
-		return res.sendValidationError({name : "ExpressValidationError", errors :errors});
-	}
-	req.app.get("actions").projects.setServiceMode({
-		projectId : projectId,
-		warranty : req.body.warranty,
-		isNewLeader : isNewLeader,
-		//tu dane dla lidera
-		firstname : req.body.firstname,
-		lastname : req.body.lastname,
-		email : req.body.email,
-		phone : req.body.phone,
-		password : generatePassword(12, true),
 	})
-	.then(function(data){
-		if(data.accountOperation === 'CREATE_NEW' || data.accountOperation === 'ACTIVE_PROPOSITION'){
-			//wysyłamy sms
-			return res.sendData(200);
-		} else {
-			return res.sendData(200);
-		}
-	})
-	.catch(function (err) {
-		console.log(err);
+	.catch(function(err){
 		return res.sendValidationError(err);
 	});
 });
+
+
+router.use("/projects/", require("./projects/payment"));
+router.use("/projects/", require("./projects/changeStatus"));
+router.use("/projects/", require("./projects/serviceMode"));
+
+
 module.exports = router;

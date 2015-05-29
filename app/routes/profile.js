@@ -20,11 +20,12 @@ router.post("/profiles", function(req, res){
 		flat_address : req.body.flat_address,
 		zipcode_address : req.body.zipcode_address,
 		city_address : req.body.city_address,
-	}, function(err, data){
-		if(err !== null){
-			return res.sendValidationError(err);
-		}
+	})
+	.then(function(data){
 		return res.sendData(200, {id: data.id, link : "/profiles/" + data.id});
+	})
+	.catch(function(err){
+		return res.sendValidationError(err);
 	});
 });
 module.exports = router;

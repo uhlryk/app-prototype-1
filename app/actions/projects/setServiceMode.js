@@ -14,35 +14,13 @@
  * return
  * {model: accountModel, operation: [CREATE_NEW | ACTIVE_PROPOSITION | ACTIVE]}
  */
-module.exports = function(data, cb, models, actions){
-	if(data.transaction){
-		return model(data, t, models, actions);
-	} else {
-		return models.sequelize.transaction()
-		.then(function (t) {
-			return model(data, t, models, actions)
-			.then(function(result){
-				t.commit();
-				return new Promise(function(resolve) {
-					resolve(result);
-				});
-			})
-			.catch(function (err) {
-				t.rollback();
-				throw err;
-			});
-		});
-	}
-};
-function model(data, cb, models, actions){
-	var transaction = data.transaction;
+module.exports = function(data, transaction, models, actions){
 	var accountOperation;
 	var projectModel;
 	var accountModel;
 	/**
 	 * Wyciągamy projekt na podstawie id który chcemy zmienić
 	 */
-	console.log(data.projectId);
 	return models.Project.find({
 		where : {
 			status : "ACTIVE",
@@ -76,7 +54,7 @@ function model(data, cb, models, actions){
 				phone : data.phone,
 				password : data.password,
 				projectId : data.projectId,
-			})
+			}, transaction)
 			.then(function(resultData){
 				accountOperation = resultData.operation;
 				accountModel = resultData.model;
@@ -94,4 +72,4 @@ function model(data, cb, models, actions){
 			});
 		});
 	});
-}
+};

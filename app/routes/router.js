@@ -13,20 +13,21 @@ router.use(function(req, res, next){
 		// console.log(token);
 		req.app.get("actions").tokens.find({
 			token : token
-		}, function(err, data){
-			if(err !== null){
-				return res.sendValidationError(err);
-			}
+		})
+		.then(function(data){
 			if(data === null){
 				return res.sendData(401, {message : "TOKEN_INVALID"});
 			} else {
 				req.user = {
 					type:data.type,//jaki typ usera SUPER || USER
-					AccountId : data.AccountId,
+					accountId : data.accountId,
 					data : data.data
 				};
 				return next();
 			}
+		})
+		.catch(function (err) {
+			return res.sendValidationError(err);
 		});
 	} else {
 		return next();

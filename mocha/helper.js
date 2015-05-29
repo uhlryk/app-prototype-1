@@ -27,7 +27,6 @@ module.exports = function(server, url){
 			.set('access-token', adminToken)
 			.end(function(err, res){
 				expect(res.status).to.be.equal(200);
-				console.log(res.body);
 				expect(res.body.token).to.be.a("string");
 				cb(res.body.token);
 			});

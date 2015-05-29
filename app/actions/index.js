@@ -39,8 +39,26 @@ module.exports = function(config){
 			 * @type {[type]}
 			 */
 			var _action = require(path.join(actionPath, file));
-			actions[controller][fileName] = function(c, cb){
-				return _action(c, cb, config.models, actions);
+			actions[controller][fileName] = function(data, transaction){
+				// return _action(c, cb, config.models, actions);
+				if(transaction){
+					// return model(data, transaction, models, actions);
+					return _action(data, transaction, config.models, actions);
+				} else {
+					return config.models.sequelize.transaction().then(function (transaction) {
+						return _action(data, transaction, config.models, actions)
+						.then(function(result){
+							transaction.commit();
+							return new Promise(function(resolve) {
+								resolve(result);
+							});
+						})
+						.catch(function (err) {
+							transaction.rollback();
+							throw err;
+						});
+					});
+				}
 			};
 		});
 	});

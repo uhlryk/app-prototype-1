@@ -14,15 +14,16 @@ router.get("/tokens/:token", function(req, res, next){
 	var token = req.params.token;
 	req.app.get("actions").tokens.find({
 		token : token
-	}, function(err, data){
-		if(err !== null){
-			return next(err);
-		}
+	})
+	.then(function(data){
 		if(data === null){
 			return res.sendData(200, {status : "INVALID"});
 		} else {
 			return res.sendData(200, {status : "VALID"});
 		}
+	})
+	.catch(function (err) {
+		return res.sendValidationError(err);
 	});
 });
 router.post("/tokens/", function(req, res, next){
@@ -33,14 +34,15 @@ router.post("/tokens/", function(req, res, next){
 		if(login === req.app.get("config").adminAuth.login && password === req.app.get("config").adminAuth.pass){
 			req.app.get("actions").tokens.create({
 				token:uuid.v1(),
-				AccountId:null,
+				accountId:null,
 				type:'SUPER',
 				data: ""
-			}, function(err, data){
-				if(err !== null){
-					return res.sendValidationError(err);
-				}
-				return res.sendData(200, {token : data.token});
+			})
+			.then(function(data){
+				return res.sendData(200, {token : data.model.token});
+			})
+			.catch(function (err) {
+				return res.sendValidationError(err);
 			});
 		} else {
 			//TODO: zmienić na sendValidationError i pomyśleć nad zmianą kodu
@@ -49,29 +51,31 @@ router.post("/tokens/", function(req, res, next){
 	} else {//logowanie pozostałych userów
 		req.app.get("actions").accounts.find({
 			phone : login
-		}, function(err, accountData){
-			if(err !== null){
-				return res.sendValidationError(err);
-			}
-			if(accountData === null){
+		})
+		.then(function(data){
+			if(data === null){
 				//TODO: zmienić na sendValidationError i pomyśleć nad zmianą kodu
 				return res.sendData(422, {message : "INCORRECT_LOGIN_PASSWORD"});
 			}
-			if(bcrypt.compareSync(password, accountData.password)){
+			if(bcrypt.compareSync(password, data.password)){
 				req.app.get("actions").tokens.create({
 					token:uuid.v1(),
-					AccountId:accountData.id,
+					accountId:data.id,
 					data: ""
-				}, function(err, data){
-					if(err !== null){
-						return res.sendValidationError(err);
-					}
-					return res.sendData(200, {token : data.token});
+				})
+				.then(function(data){
+					return res.sendData(200, {token : data.model.token});
+				})
+				.catch(function (err) {
+					return res.sendValidationError(err);
 				});
 			}else{
 					//TODO: zmienić na sendValidationError i pomyśleć nad zmianą kodu
 				return res.sendData(422, {message : "INCORRECT_LOGIN_PASSWORD"});
 			}
+		})
+		.catch(function (err) {
+			return res.sendValidationError(err);
 		});
 	}
 });

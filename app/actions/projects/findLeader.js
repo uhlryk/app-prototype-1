@@ -1,27 +1,24 @@
 /**
  * zwraca account wraz z ProjectAccount i Project do lidera danego projektu
+ * jest źle bo na poziomie ProjectAccount
  */
-module.exports = function(projectId, cb, models){
+module.exports = function(data, transaction, models, actions){
 	return models.Project.find({
 		where : {
-			id : projectId,
+			id : data.projectId,
 		},
 		include : [{
 			model: models.ProjectAccount,
 			where : {
-				role : 'PROJECT_LEADER'
+				role : 'PROJECT_LEADER',
+				status : 'ACTIVE'
 			},
 			include:[models.Account]
 		}],
-	}, {raw:true})
+	}, {transaction:transaction})
 	.then(function(projectModel){
-		if(projectModel === null){
-			cb(null, null);
-		}else {
-			cb(null, projectModel);
-		}
-	})
-	.catch(function (err) {
-		cb(err);
+		return new Promise(function(resolve){
+			resolve(projectModel);
+		});
 	});
 };
