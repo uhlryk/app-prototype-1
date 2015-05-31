@@ -28,6 +28,7 @@ module.exports = function(config, callback) {
 		res.header('Access-Control-Allow-Headers', 'Content-Type, Access-Token, Accept, Origin, X-Requested-With');
 		next();
 	});
+
 	app.use(function(req, res, next){
 		res.sendData = function(status, jsonData){
 			if(jsonData){
@@ -50,6 +51,7 @@ module.exports = function(config, callback) {
 	app.set('models', models);
 	app.set('actions', actions);
 	app.set('port', config.app.port);
+	app.use(require("./routes/ruleAccess"));
 	/**
 	 * router
 	 */

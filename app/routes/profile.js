@@ -9,9 +9,10 @@ var express = require('express');
 var router = new express.Router();
 
 router.post("/profiles", function(req, res){
-	if(req.user === null || req.user.type !== "SUPER"){
-		return res.sendData(401, {message : "NO_TOKEN"});
-	}
+	if(req.ruleAccess.isAllowed("CREATE_PROFILE") === false)return res.sendData(401, {message : "NO_TOKEN"});
+	// if(req.user === null || req.user.type !== "SUPER"){
+	// 	return res.sendData(401, {message : "NO_TOKEN"});
+	// }
 	req.app.get("actions").profiles.create({
 		firmname : req.body.firmname,
 		nip : req.body.nip,

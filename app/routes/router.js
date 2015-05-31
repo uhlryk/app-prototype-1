@@ -23,6 +23,11 @@ router.use(function(req, res, next){
 					accountId : data.accountId,
 					data : data.data
 				};
+				req.ruleAccess.setUserResource({
+					type:data.type,//jaki typ usera SUPER || USER
+					accountId : data.accountId,
+					data : data.data
+				});
 				return next();
 			}
 		})
