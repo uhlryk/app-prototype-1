@@ -7,13 +7,11 @@
 
 var express = require('express');
 var router = new express.Router();
-var generatePassword = require('password-generator');
-var phone = require('phone');
+var RuleAccess = require('ruleaccess');
 
-router.post("/status", function(req, res){
-	if(req.user === null)return res.sendData(401, {message : "NO_TOKEN"});
-	if(req.user.type !== "SUPER")return res.sendData(403, {message : "NO_AUTHORIZATION"});
+router.post("/status", RuleAccess.isAllowed("PROJECT/CHANGE_STATUS"), function(req, res){
 	req.checkBody('project_id', 'INVALID_FIELD').isId();
+	req.sanitize('project_id').toInt();
 	req.checkBody('status', 'REQUIRE_FIELD').notEmpty();
 	var errors = req.validationErrors();
 	if (errors) {

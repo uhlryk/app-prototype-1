@@ -4,11 +4,33 @@
  * data.token
  * return
  * {
- *		data zserializowane dodatkowe dane
- *		type zależy cz mamy do czynienia z użytkownikiem czy superadministratorem 'SUPER','USER'
- *		accountId id użytkownika który używa tokena
- *	}
- *	lub undefined
+ * 	data - obiekt z dowolnymi danymi zapisywanymi w 'sesji'
+ * 	type - jeśli 'SUPER' to mamy doczynienia z super adminem. Pozostali mają 'USER'
+ * 	AccountId - id konta usera, superadmin ma null
+ * 	Account : { szczegóły konta użytkownika, super admin ma null, są tylko aktywne konta brane
+ * 		id - to samo co AccountId
+ * 		phone - login usera
+ * 		ProfileId - id profilu, tą wartość ma tylko administrator profilu - jedno powiązanie maksymalnie
+ * 		ProjectAccounts : {[ - lista ról we wszystkich projektach, może być [] przy braku ról, są tylko aktywne role brane
+ * 			role - rola usera w projekcie
+ * 			ProjectId - id projektu
+ * 			Project { - szczegóły projektu, wszystkie projekty brane
+ * 				status - ACTIVE | DISABLE
+ * 				package - jaki pakiet 'BASIC' | 'PROFESSIONAL'
+ * 				mode - w jakim trybie jest projekt 'INIT' | 'BUILD' | 'SERVICE' | 'FINISH'
+ * 				start_date - data rozpoczęcia projektu
+ * 				finish_date - data zakończenia fazy budowy
+ * 				warranty_date - data końca serwisowania
+ * 				paid_date - data do której jest opłacony projekt
+ * 				ProfileId - id profilu do którego należy ten projekt
+ * 				Profile { szczegóły profilu do którego należy konto, brane są wszystkie profile
+ * 					status - ACTIVE | DISABLE
+ * 				}
+ * 			}
+ * 		]}
+ * 	}
+ * }
+ *	lub null
  */
 module.exports = function(data, transaction, models, actions){
 	return models.Token.find({
@@ -16,19 +38,44 @@ module.exports = function(data, transaction, models, actions){
 			token : data.token,
 			status : "ACTIVE"
 		},
-		include : [models.Account]
+		attributes:['data', 'type', 'AccountId'],
+		include : [{
+			model: models.Account,
+			where : {
+				status : 'ACTIVE'
+			},
+			attributes : ['id','phone','ProfileId'],
+			required: false,
+			include : [{
+				model: models.ProjectAccount,
+				where : {
+					status : 'ACTIVE'
+				},
+				attributes: ['role', 'ProjectId'],
+				required: false,
+				include : [{
+					model : models.Project,
+					attributes: ['status','package', 'mode', 'start_date', 'finish_date', 'warranty_date', 'paid_date', 'ProfileId'],
+					required: false,
+					include : [{
+						model : models.Profile,
+						attributes: ['status'],
+						required: false
+					}]
+				}]
+			}],
+		}],
 	}, {transaction : transaction})
 	.then(function(tokenModel){
-		var dataModel = null;
-		if(tokenModel !== null){
-			dataModel = {
-				data : tokenModel.data,
-				type : tokenModel.type,
-				accountId : tokenModel.AccountId,
-			};
+		var tokenData = null;
+		if(tokenModel){
+			tokenData = tokenModel.toJSON();
+			// console.log("------------------");
+			// console.log(JSON.stringify(tokenData));
+			// console.log("------------------");
 		}
 		return new Promise(function(resolve) {
-			resolve(dataModel);
+			resolve(tokenData);
 		});
 	});
 };

@@ -1,9 +1,14 @@
-/*jslint node: true */
-"use strict";
 /**
- * sprawdza czy istnieje konto, jeśli nie istnieje to tworzy je,
- * dla danego konta dodaje funkcję administratora profilu
- *	wymagane są tylko pola: phone, profile_id
+ * tworzy projekt, jedynie profile admin może to zrobić
+ * wysyłamy postem
+ * profile_id
+ * name
+ * package
+ * phone
+ * firstname
+ * lastname
+ * email
+ * phone
  */
 
 var express = require('express');
@@ -12,44 +17,50 @@ var RuleAccess = require('ruleaccess');
 var generatePassword = require('password-generator');
 var phone = require('phone');
 
-router.post("/profile_admin/", RuleAccess.isAllowed("USER/PROFILE_ADMIN/CREATE"), function(req, res, next){
+router.post("/", RuleAccess.isAllowed("PROJECT/CREATE"), function(req, res){
 	req.checkBody('profile_id', 'INVALID_FIELD').isId();
 	req.sanitize('profile_id').toInt();
-	var profileId = req.body.profile_id;
 	req.sanitize("phone").normalizePhone();
 	req.checkBody('phone', 'REQUIRE_FIELD').notEmpty();
+	var profileId = req.body.profile_id;
+	var login = req.body.phone;
 	var errors = req.validationErrors();
 	if (errors) {
 		return res.sendValidationError({name : "ExpressValidationError", errors :errors});
 	}
-	req.app.get("actions").accounts.createProfileAdmin({
+	req.app.get("actions").projects.create({
+		//dane dla projektu
+		name : req.body.name,
+		package : req.body.package,
+		ProfileId : profileId,
+		//tu dane dla lidera
 		firstname : req.body.firstname,
 		lastname : req.body.lastname,
 		email : req.body.email,
-		phone : req.body.phone,
+		phone : login,
 		password : generatePassword(12, true),
-		ProfileId : profileId,
 	})
-	.then(function(accountData){
-		if(accountData.sendSMS){
-			req.app.get('sms').send(accountData.phone, {
-				firstname : accountData.firstname,
-				lastname : accountData.lastname,
-				AccountId : accountData.id,
-				password : accountData.password,
-				phone : accountData.phone,
+	.then(function(data){
+		if(data.sendSMS){
+			req.app.get('sms').send(data.phone, {
+				firstname : data.firstname,
+				lastname : data.lastname,
+				AccountId : data.id,
+				password : data.password,
+				phone : data.phone,
 			}, function(err, message){
 				if(err){
 					//todo: zwrócić jakis błąd gdy sms nie wyjdzie
 				}
-				return res.sendData(200, {login: accountData.phone});
+				return res.sendData(200, {login: data.phone, id: data.ProjectId});
 			});
 		} else {
-			return res.sendData(200, {login: accountData.phone});
+			return res.sendData(200, {login: data.phone, id: data.ProjectId});
 		}
 	})
 	.catch(function(err){
 		return res.sendValidationError(err);
 	});
 });
+
 module.exports = router;

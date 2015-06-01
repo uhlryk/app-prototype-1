@@ -23,6 +23,7 @@ router.get("/tokens/:token", function(req, res, next){
 		}
 	})
 	.catch(function (err) {
+		// console.log(err);
 		return res.sendValidationError(err);
 	});
 });

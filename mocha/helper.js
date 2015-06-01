@@ -75,6 +75,7 @@ module.exports = function(server, url){
 			.send({profile_id : profileId})
 			.send({phone : "+48791111111"})
 			.end(function(err, res){
+				// console.log(res.body);
 				expect(res.status).to.be.equal(200);
 				expect(res.body.login).to.be.a("string");
 				expect(res.body.id).to.be.above(0);

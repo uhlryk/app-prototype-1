@@ -7,12 +7,9 @@
 
 var express = require('express');
 var router = new express.Router();
+var RuleAccess = require('ruleaccess');
 
-router.post("/profiles", function(req, res){
-	if(req.ruleAccess.isAllowed("CREATE_PROFILE") === false)return res.sendData(401, {message : "NO_TOKEN"});
-	// if(req.user === null || req.user.type !== "SUPER"){
-	// 	return res.sendData(401, {message : "NO_TOKEN"});
-	// }
+router.post("/profiles", RuleAccess.isAllowed("PROFILE/CREATE"), function(req, res){
 	req.app.get("actions").profiles.create({
 		firmname : req.body.firmname,
 		nip : req.body.nip,

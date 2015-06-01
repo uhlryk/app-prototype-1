@@ -48,7 +48,7 @@ describe("Leader test: ", function(){
 			.send({firmname : "moja firma która ma jakąś nazwę jakiej nie pamiętam, ale jest długa"})
 			.end(function(err, res){
 				expect(res.status).to.be.equal(401);
-				expect(res.body.message).to.be.equal("NO_TOKEN");
+				expect(res.body.message).to.be.equal("NOT_AUTHORIZED");
 				done();
 			});
 		});
@@ -60,9 +60,32 @@ describe("Leader test: ", function(){
 			.send({profile_id : profileId})
 			.send({phone : "+48791111191"})
 			.end(function(err, res){
-				expect(res.status).to.be.equal(403);
-				expect(res.body.message).to.be.equal("NO_AUTHORIZATION");
+				expect(res.status).to.be.equal(401);
+				expect(res.body.message).to.be.equal("NOT_AUTHORIZED");
 				done();
+			});
+		});
+		it("should create second project to this leader", function(done){
+			request.post(url + "/projects")
+			.set('access-token', profileAdminToken)
+			.send({name : "projekt o nazwie 2"})
+			.send({package : "BASIC"})
+			.send({profile_id : profileId})
+			.send({phone : "+48791111111"})
+			.end(function(err, res){
+				expect(res.status).to.be.equal(200);
+				expect(res.body.login).to.be.a("string");
+				var smsData = server.getSmsDebug(res.body.login);
+				expect(smsData.password).to.be.a("string");
+				expect(res.body.id).to.be.above(0);
+				helper.loginUser(leaderLogin, leaderPassword, function(token){
+					request.get(url + "/")
+					.set('access-token',token)
+					.end(function(err, res){
+						expect(res.status).to.be.equal(200);
+						done();
+					});
+				});
 			});
 		});
 

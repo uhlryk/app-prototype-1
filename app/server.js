@@ -51,10 +51,10 @@ module.exports = function(config, callback) {
 	app.set('models', models);
 	app.set('actions', actions);
 	app.set('port', config.app.port);
-	app.use(require("./routes/ruleAccess"));
-	/**
-	 * router
-	 */
+	var RuleAccess = require('ruleaccess');
+	var ruleAccess = new RuleAccess();
+	app.use(ruleAccess.middleware());
+	require("./routes/ruleAccess")(ruleAccess);
 	app.use(require("./routes/router"));
 
 	var server = http.createServer(app);

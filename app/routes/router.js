@@ -18,16 +18,8 @@ router.use(function(req, res, next){
 			if(data === null){
 				return res.sendData(401, {message : "TOKEN_INVALID"});
 			} else {
-				req.user = {
-					type:data.type,//jaki typ usera SUPER || USER
-					accountId : data.accountId,
-					data : data.data
-				};
-				req.ruleAccess.setUserResource({
-					type:data.type,//jaki typ usera SUPER || USER
-					accountId : data.accountId,
-					data : data.data
-				});
+				req.user = data;
+				req.setUserData(data);
 				return next();
 			}
 		})

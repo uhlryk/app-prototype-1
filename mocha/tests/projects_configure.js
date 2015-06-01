@@ -48,28 +48,28 @@ describe("Create project test: ", function(){
 			});
 		});
 		it("should not configure project by not login user", function(done){
-			request.post(url + "/projects/configure")
+			request.post(url + "/projects/mode/build")
 			.send({"project_id": projectId})
 			.end(function(err, res){
 				expect(res.status).to.be.equal(401);
-				expect(res.body.message).to.be.equal("NO_TOKEN");
+				expect(res.body.message).to.be.equal("NOT_AUTHORIZED");
 				done();
 			});
 		});
 		it("should not configure project by admin", function(done){
-			request.post(url + "/projects/configure")
+			request.post(url + "/projects/mode/build")
 			.set('access-token', superUserToken)
 			.send({"project_id": projectId})
 			.end(function(err, res){
-				expect(res.status).to.be.equal(403);
-				expect(res.body.message).to.be.equal("NO_AUTHORIZATION");
+				expect(res.status).to.be.equal(401);
+				expect(res.body.message).to.be.equal("NOT_AUTHORIZED");
 				done();
 			});
 		});
 		it("should not configure project when there is no start_date and finish_date send", function(done){
-			request.post(url + "/projects/configure")
+			request.post(url + "/projects/mode/build")
 			.set('access-token', leaderToken)
-			.send({"project_id": "999"})
+			.send({"project_id": projectId})
 			.end(function(err, res){
 				expect(res.status).to.be.equal(422);
 				expect(res.body.message).to.be.equal("VALIDATION_ERROR");
@@ -78,20 +78,19 @@ describe("Create project test: ", function(){
 			});
 		});
 		it("should not configure project when project not exist", function(done){
-			request.post(url + "/projects/configure")
+			request.post(url + "/projects/mode/build")
 			.set('access-token', leaderToken)
 			.send({"project_id": "999"})
 			.send({"start_date": "2013-03-01"})
 			.send({"finish_date": "2013-05-01"})
 			.end(function(err, res){
-				expect(res.status).to.be.equal(422);
-				expect(res.body.message).to.be.equal("PROCESS_ERROR");
-				expect(res.body.type).to.be.equal("WRONG_VALUE");
+				expect(res.status).to.be.equal(401);
+				expect(res.body.message).to.be.equal("NOT_AUTHORIZED");
 				done();
 			});
 		});
 		it("should not configure project when start_date is not send", function(done){
-			request.post(url + "/projects/configure")
+			request.post(url + "/projects/mode/build")
 			.set('access-token', leaderToken)
 			.send({"project_id": projectId})
 			.send({"finish_date": "2013-05-01"})
@@ -103,7 +102,7 @@ describe("Create project test: ", function(){
 			});
 		});
 		it("should not configure project when finish_date is not send", function(done){
-			request.post(url + "/projects/configure")
+			request.post(url + "/projects/mode/build")
 			.set('access-token', leaderToken)
 			.send({"project_id": projectId})
 			.send({"start_date": "2013-05-01"})
@@ -115,7 +114,7 @@ describe("Create project test: ", function(){
 			});
 		});
 		it("should not configure project when finish_date is lower then start_date", function(done){
-			request.post(url + "/projects/configure")
+			request.post(url + "/projects/mode/build")
 			.set('access-token', leaderToken)
 			.send({"project_id": projectId})
 			.send({"start_date": "2013-07-01"})
@@ -128,7 +127,7 @@ describe("Create project test: ", function(){
 			});
 		});
 		it("should configure project and make it BUILD mode", function(done){
-			request.post(url + "/projects/configure")
+			request.post(url + "/projects/mode/build")
 			.set('access-token', leaderToken)
 			.send({"project_id":projectId})
 			.send({"start_date": "2013-03-01"})
@@ -141,14 +140,14 @@ describe("Create project test: ", function(){
 			});
 		});
 		it("should not configure project when it is not INIT mode", function(done){
-			request.post(url + "/projects/configure")
+			request.post(url + "/projects/mode/build")
 			.set('access-token', leaderToken)
 			.send({"project_id":projectId})
 			.send({"start_date": "2013-03-01"})
 			.send({"finish_date": "2013-05-01"})
 			.send({"investor_firmname": "inwestor testowy"})
 			.end(function(err, res){
-				request.post(url + "/projects/configure")
+				request.post(url + "/projects/mode/build")
 				.set('access-token', leaderToken)
 				.send({"project_id":projectId})
 				.send({"start_date": "2013-04-01"})
@@ -173,16 +172,15 @@ describe("Create project test: ", function(){
 				});
 			});
 			it("should not configure project", function(done){
-				request.post(url + "/projects/configure")
+				request.post(url + "/projects/mode/build")
 				.set('access-token', leaderToken)
 				.send({"project_id":projectId})
 				.send({"start_date": "2013-04-01"})
 				.send({"finish_date": "2013-06-01"})
 				.send({"investor_firmname": "inwestor testowy"})
 				.end(function(err, res){
-					expect(res.status).to.be.equal(422);
-					expect(res.body.message).to.be.equal("PROCESS_ERROR");
-					expect(res.body.type).to.be.equal("INVALID_PROJECT");
+					expect(res.status).to.be.equal(401);
+					expect(res.body.message).to.be.equal("NOT_AUTHORIZED");
 					done();
 				});
 			});

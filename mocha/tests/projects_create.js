@@ -20,7 +20,7 @@ describe("Create project test: ", function(){
 			request.post(url + "/projects")
 			.end(function(err, res){
 				expect(res.status).to.be.equal(401);
-				expect(res.body.message).to.be.equal("NO_TOKEN");
+				expect(res.body.message).to.be.equal("NOT_AUTHORIZED");
 				done();
 			});
 		});
@@ -54,7 +54,6 @@ describe("Create project test: ", function(){
 			request.post(url + "/projects")
 			.set('access-token', profileAdminToken)
 			.send({name : "projekt o nazwie 1"})
-			.send({test : "ALa ma Kota"})
 			.send({package : "BASIC"})
 			.send({profile_id : profileId})
 			.send({phone : "+48791991111"})
@@ -87,9 +86,8 @@ describe("Create project test: ", function(){
 			.send({package : "BASIC"})
 			.send({phone : "+48791111112"})
 			.end(function(err, res){
-				expect(res.status).to.be.equal(422);
-				expect(res.body.message).to.be.equal("VALIDATION_ERROR");
-				expect(res.body.errors).to.include.some.property("type", "INVALID_FIELD");
+				expect(res.status).to.be.equal(401);
+				expect(res.body.message).to.be.equal("NOT_AUTHORIZED");
 				done();
 			});
 		});
@@ -101,9 +99,8 @@ describe("Create project test: ", function(){
 			.send({profile_id : 999})
 			.send({phone : "+48791111113"})
 			.end(function(err, res){
-				expect(res.status).to.be.equal(422);
-				expect(res.body.message).to.be.equal("PROCESS_ERROR");
-				expect(res.body.type).to.be.equal("EMPTY_PROFILE");
+				expect(res.status).to.be.equal(401);
+				expect(res.body.message).to.be.equal("NOT_AUTHORIZED");
 				done();
 			});
 		});
@@ -115,9 +112,8 @@ describe("Create project test: ", function(){
 			.send({profile_id : "AAA"})
 			.send({phone : "+48791111113"})
 			.end(function(err, res){
-				expect(res.status).to.be.equal(422);
-				expect(res.body.message).to.be.equal("VALIDATION_ERROR");
-				expect(res.body.errors).to.include.some.property("type", "INVALID_FIELD");
+				expect(res.status).to.be.equal(401);
+				expect(res.body.message).to.be.equal("NOT_AUTHORIZED");
 				done();
 			});
 		});

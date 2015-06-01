@@ -3,22 +3,23 @@
  * Wskazujemy też nowego lidera lub informujemy że obecny jest liderem
  * wysyłamy postem
  * project_id
- * warranty liczba określająca liczbę miesięcy jakie trwa gwarancja
+ * warranty_date liczba określająca liczbę miesięcy jakie trwa gwarancja
  * is_new_leader jeśli true to musimy podać przynajmniej telefon nowego lidera
  *
  */
 
 var express = require('express');
 var router = new express.Router();
+var RuleAccess = require('ruleaccess');
 var generatePassword = require('password-generator');
 var phone = require('phone');
 
-router.post("/mode/service", function(req, res){
-	if(req.user === null)return res.sendData(401, {message : "NO_TOKEN"});
-	if(req.user.type === "SUPER")return res.sendData(403, {message : "NO_AUTHORIZATION"});
+router.post("/mode/service", RuleAccess.isAllowed("PROJECT/SET_MODE_SERVICE"), function(req, res){
 	req.checkBody('project_id', 'INVALID_FIELD').isId();
+	req.sanitize('project_id').toInt();
 	var projectId = req.body.project_id;
-	req.checkBody('warranty', 'REQUIRE_FIELD').isInt();
+	req.checkBody('warranty_date', 'INVALID_FIELD').isDate();
+	req.sanitize('warranty_date').toDate();
 	req.sanitize("is_new_leader").toBoolean();
 	var isNewLeader = req.body.is_new_leader;
 	if(isNewLeader){
@@ -31,7 +32,7 @@ router.post("/mode/service", function(req, res){
 	}
 	req.app.get("actions").projects.setServiceMode({
 		projectId : projectId,
-		warranty : req.body.warranty,
+		warranty_date : req.body.warranty_date,
 		isNewLeader : isNewLeader,
 		//tu dane dla lidera
 		firstname : req.body.firstname,

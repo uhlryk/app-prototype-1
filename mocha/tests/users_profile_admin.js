@@ -20,7 +20,7 @@ describe("Create profile admin test: ", function(){
 			request.post(url + "/users/profile_admin")
 			.end(function(err, res){
 				expect(res.status).to.be.equal(401);
-				expect(res.body.message).to.be.equal("NO_TOKEN");
+				expect(res.body.message).to.be.equal("NOT_AUTHORIZED");
 				done();
 			});
 		});
@@ -62,7 +62,7 @@ describe("Create profile admin test: ", function(){
 			.end(function(err, res){
 				expect(res.status).to.be.equal(422);
 				expect(res.body.message).to.be.equal("PROCESS_ERROR");
-				expect(res.body.type).to.be.equal("EMPTY_PROFILE");
+				expect(res.body.type).to.be.equal("FOREIGN_KEY_CONSTRAINT");
 				done();
 			});
 		});
@@ -116,7 +116,7 @@ describe("Create profile admin test: ", function(){
 				.end(function(err, res){
 					expect(res.status).to.be.equal(422);
 					expect(res.body.message).to.be.equal("VALIDATION_ERROR");
-					expect(res.body.errors).to.include.some.property("type", "WRONG_PHONE");
+					expect(res.body.errors).to.include.some.property("type", "REQUIRE_FIELD");
 					done();
 				});
 			});
@@ -261,9 +261,8 @@ describe("Create profile admin test: ", function(){
 				.send({profile_id : secondProfileId})
 				.send({phone : "+48701011316"})
 				.end(function(err, res){
-					expect(res.status).to.be.equal(422);
-					expect(res.body.message).to.be.equal("PROCESS_ERROR");
-					expect(res.body.type).to.be.equal("WRONG_VALUE");
+					expect(res.status).to.be.equal(401);
+					expect(res.body.message).to.be.equal("NOT_AUTHORIZED");
 					done();
 				});
 			});

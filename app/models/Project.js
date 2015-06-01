@@ -37,14 +37,13 @@ module.exports = function(sequelize, DataTypes) {
 			type: DataTypes.DATE,
 			allowNull : true,
 		},
+		warranty_date : {
+			type : DataTypes.DATE
+		},
 		investor_firmname : {
 			type : DataTypes.STRING(50),
 			allowNull : true,
 		},
-		warranty : {
-			type : DataTypes.INTEGER,
-			allowNull : true,
-		}
 	}, {
 		paranoid: true,
 		freezeTableName: true,

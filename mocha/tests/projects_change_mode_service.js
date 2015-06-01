@@ -53,21 +53,20 @@ describe("project Change mode to service test: ", function(){
 			request.post(url + "/projects/mode/service")
 			.set('access-token', leaderToken)
 			.send({"project_id":999})
-			.send({"warranty": 10})
+			.send({"warranty_date": "2015-03-01"})
 			.send({"is_new_leader": true})
 			.send({phone : "+48791881116"})
 			.end(function(err, res){
-				expect(res.status).to.be.equal(422);
-				expect(res.body.message).to.be.equal("PROCESS_ERROR");
-				expect(res.body.type).to.be.equal("INVALID_PROJECT");
+				expect(res.status).to.be.equal(401);
+				expect(res.body.message).to.be.equal("NOT_AUTHORIZED");
 				done();
 			});
 		});
 		it("should not change mode from BUILD to SERVICE when is_new_leader but not phone", function(done){
 			request.post(url + "/projects/mode/service")
 			.set('access-token', leaderToken)
-			.send({"project_id":999})
-			.send({"warranty": 10})
+			.send({"project_id":projectId})
+			.send({"warranty_date": "2015-03-01"})
 			.send({"is_new_leader": true})
 			.end(function(err, res){
 				expect(res.status).to.be.equal(422);
@@ -79,8 +78,8 @@ describe("project Change mode to service test: ", function(){
 		it("should not change mode from BUILD to SERVICE when is_new_leader but wrong phone", function(done){
 			request.post(url + "/projects/mode/service")
 			.set('access-token', leaderToken)
-			.send({"project_id":999})
-			.send({"warranty": 10})
+			.send({"project_id":projectId})
+			.send({"warranty_date": "2015-03-01"})
 			.send({"is_new_leader": true})
 			.send({phone : "+48781116"})
 			.end(function(err, res){
@@ -94,7 +93,7 @@ describe("project Change mode to service test: ", function(){
 			request.post(url + "/projects/mode/service")
 			.set('access-token', leaderToken)
 			.send({"project_id":projectId})
-			.send({"warranty": 10})
+			.send({"warranty_date": "2015-03-01"})
 			.send({"is_new_leader": true})
 			.send({phone : "+48791881116"})
 			.end(function(err, res){
@@ -106,7 +105,7 @@ describe("project Change mode to service test: ", function(){
 		});
 		describe("project is Configure", function(){
 			before(function(done){
-				request.post(url + "/projects/configure")
+				request.post(url + "/projects/mode/build")
 				.set('access-token', leaderToken)
 				.send({"project_id":projectId})
 				.send({"start_date": "2013-03-01"})
@@ -120,7 +119,7 @@ describe("project Change mode to service test: ", function(){
 				request.post(url + "/projects/mode/service")
 				.set('access-token', leaderToken)
 				.send({"project_id":projectId})
-				.send({"warranty": 10})
+				.send({"warranty_date": "2015-03-01"})
 				.send({"is_new_leader": true})
 				.send({phone : "+48791881116"})
 				.end(function(err, res){

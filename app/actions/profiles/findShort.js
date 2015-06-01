@@ -1,3 +1,5 @@
+//remove
+
 /**
  * TODO: całe do przebudowy lub usunięcia. najlepiej by zastąpił to bardziej użyteczny moduł
  * Służy do wyciąfnięcia dla projektu id kont które są PROFILE_ADMIN

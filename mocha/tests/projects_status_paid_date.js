@@ -130,8 +130,8 @@ describe("Project change status and set paid date test: ", function(){
 				.send({"project_id":projectId})
 				.send({"paid_date": "2014-03-01"})
 				.end(function(err, res){
-					expect(res.status).to.be.equal(403);
-					expect(res.body.message).to.be.equal("NO_AUTHORIZATION");
+					expect(res.status).to.be.equal(401);
+					expect(res.body.message).to.be.equal("NOT_AUTHORIZED");
 					done();
 				});
 			});
@@ -141,8 +141,8 @@ describe("Project change status and set paid date test: ", function(){
 				.send({"project_id":projectId})
 				.send({"status": "ACTIVE"})
 				.end(function(err, res){
-					expect(res.status).to.be.equal(403);
-					expect(res.body.message).to.be.equal("NO_AUTHORIZATION");
+					expect(res.status).to.be.equal(401);
+					expect(res.body.message).to.be.equal("NOT_AUTHORIZED");
 					done();
 				});
 			});

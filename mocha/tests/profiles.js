@@ -27,7 +27,7 @@ describe("Profiles test: ", function(){
 			.send({city_address : "Poznań"})
 			.end(function(err, res){
 				expect(res.status).to.be.equal(401);
-				expect(res.body.message).to.be.equal("NO_TOKEN");
+				expect(res.body.message).to.be.equal("NOT_AUTHORIZED");
 				done();
 			});
 		});

@@ -1,14 +1,14 @@
 /**
- *
+ *	superadmin może określić że dany projekt jest opłacony do danej daty
  */
 
 var express = require('express');
+var RuleAccess = require('ruleaccess');
 var router = new express.Router();
 
-router.post("/paymant", function(req, res){
-	if(req.user === null)return res.sendData(401, {message : "NO_TOKEN"});
-	if(req.user.type !== "SUPER")return res.sendData(403, {message : "NO_AUTHORIZATION"});
+router.post("/paymant", RuleAccess.isAllowed("PROJECT/PAYMENT"), function(req, res){
 	req.checkBody('project_id', 'INVALID_FIELD').isId();
+	req.sanitize('project_id').toInt();
 	req.checkBody('paid_date', 'INVALID_FIELD').isDate();
 	req.sanitize('paid_date').toDate();
 	var projectId = req.body.project_id;
