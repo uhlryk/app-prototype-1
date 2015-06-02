@@ -9,7 +9,7 @@ var express = require('express');
 var router = new express.Router();
 var RuleAccess = require('ruleaccess');
 
-router.post("/status", RuleAccess.isAllowed("PROJECT/CHANGE_STATUS"), function(req, res){
+router.post("/status", RuleAccess.isAllowed(), function(req, res){
 	req.checkBody('project_id', 'INVALID_FIELD').isId();
 	req.sanitize('project_id').toInt();
 	req.checkBody('status', 'REQUIRE_FIELD').notEmpty();

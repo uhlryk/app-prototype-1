@@ -6,7 +6,7 @@ var express = require('express');
 var RuleAccess = require('ruleaccess');
 var router = new express.Router();
 
-router.post("/paymant", RuleAccess.isAllowed("PROJECT/PAYMENT"), function(req, res){
+router.post("/paymant", RuleAccess.isAllowed(), function(req, res){
 	req.checkBody('project_id', 'INVALID_FIELD').isId();
 	req.sanitize('project_id').toInt();
 	req.checkBody('paid_date', 'INVALID_FIELD').isDate();

@@ -12,7 +12,7 @@ var RuleAccess = require('ruleaccess');
 var generatePassword = require('password-generator');
 var phone = require('phone');
 
-router.post("/profile_admin/", RuleAccess.isAllowed("USER/PROFILE_ADMIN/CREATE"), function(req, res, next){
+router.post("/profile_admin", RuleAccess.isAllowed(), function(req, res, next){
 	req.checkBody('profile_id', 'INVALID_FIELD').isId();
 	req.sanitize('profile_id').toInt();
 	var profileId = req.body.profile_id;

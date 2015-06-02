@@ -12,7 +12,7 @@ var express = require('express');
 var router = new express.Router();
 var RuleAccess = require('ruleaccess');
 
-router.post("/mode/build", RuleAccess.isAllowed("PROJECT/SET_MODE_BUILD"), function(req, res){
+router.post("/mode/build", RuleAccess.isAllowed(), function(req, res){
 	req.checkBody('project_id', 'INVALID_FIELD').isId();
 	req.sanitize('project_id').toInt();
 	req.checkBody('start_date', 'INVALID_FIELD').isDate();

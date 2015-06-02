@@ -14,7 +14,7 @@ var RuleAccess = require('ruleaccess');
 var generatePassword = require('password-generator');
 var phone = require('phone');
 
-router.post("/mode/service", RuleAccess.isAllowed("PROJECT/SET_MODE_SERVICE"), function(req, res){
+router.post("/mode/service", RuleAccess.isAllowed(), function(req, res){
 	req.checkBody('project_id', 'INVALID_FIELD').isId();
 	req.sanitize('project_id').toInt();
 	var projectId = req.body.project_id;

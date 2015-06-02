@@ -78,29 +78,29 @@ module.exports = function(ruleAccess) {
 	/**
 	 * tylko super admin ma dostęp do zasobu
 	 */
-	ruleAccess.addRule("PROFILE/CREATE", superAdminAllowed());
+	ruleAccess.addRule("POST/profiles", superAdminAllowed());
 	/**
 	 * projekt może utworzyć profileadmin profilu w którym ma być projekt lub super admin
 	 */
-	ruleAccess.addRule("USER/PROFILE_ADMIN/CREATE", RuleAccess.rule.anyOnRuleList([profileAdminAllowed(), superAdminAllowed()]));
+	ruleAccess.addRule("POST/users/profile_admin", RuleAccess.rule.anyOnRuleList([profileAdminAllowed(), superAdminAllowed()]));
 	/**
 	 * projekt może utworzyć profileadmin profilu w którym ma być projekt
 	 */
-	ruleAccess.addRule("PROJECT/CREATE", profileAdminAllowed());
+	ruleAccess.addRule("POST/projects", profileAdminAllowed());
 	/**
 	 * ustawić w tryb budowy projekt, może tylko leader tego projektu
 	 */
-	ruleAccess.addRule("PROJECT/SET_MODE_BUILD", userProjectRoleAllowed('PROJECT_LEADER'));
+	ruleAccess.addRule("POST/projects/mode/build", userProjectRoleAllowed('PROJECT_LEADER'));
 	/**
 	 * ustawić w tryb budowy projekt, może tylko leader tego projektu
 	 */
-	ruleAccess.addRule("PROJECT/SET_MODE_SERVICE", userProjectRoleAllowed('PROJECT_LEADER'));
+	ruleAccess.addRule("POST/projects/mode/service", userProjectRoleAllowed('PROJECT_LEADER'));
 	/**
 	 * tylko super admin ma dostęp do zasobu
 	 */
-	ruleAccess.addRule("PROJECT/CHANGE_STATUS", superAdminAllowed());
+	ruleAccess.addRule("POST/projects/status", superAdminAllowed());
 	/**
 	 * tylko super admin ma dostęp do zasobu
 	 */
-	ruleAccess.addRule("PROJECT/PAYMENT", superAdminAllowed());
+	ruleAccess.addRule("POST/projects/paymant", superAdminAllowed());
 };
