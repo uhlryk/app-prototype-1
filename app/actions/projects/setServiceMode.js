@@ -12,7 +12,7 @@
  * data.email
  * data.password
  * return
- * {model: accountModel, operation: [CREATE_NEW | ACTIVE_PROPOSITION | ACTIVE]}
+ * {accountModel: accountModel, projectModel:projectModel, accountOperation: [CREATE_NEW | ACTIVE_PROPOSITION | ACTIVE]}
  */
 module.exports = function(data, transaction, models, actions){
 	var accountOperation;

@@ -182,7 +182,7 @@ describe("Create profile admin test: ", function(){
 					.end(function(err, res){
 						expect(res.status).to.be.equal(422);
 						expect(res.body.message).to.be.equal("PROCESS_ERROR");
-						expect(res.body.type).to.be.equal("DUPLICATE_USER");
+						expect(res.body.type).to.be.equal("ROLE_ERROR");
 						done();
 					});
 				});

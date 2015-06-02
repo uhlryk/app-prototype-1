@@ -64,7 +64,7 @@ function userProjectRoleAllowed(role){
 		var projectId = params.body.project_id;
 		if(userData && userData.Account && userData.Account.ProjectAccounts && userData.Account.ProjectAccounts.some){
 			return userData.Account.ProjectAccounts.some(function(roleData){
-				if(roleData.Project && roleData.Project.status === 'ACTIVE' && roleData.role === role && roleData.ProjectId === projectId){
+				if(roleData.Project && roleData.Project.status === 'ACTIVE' && roleData.role === role && projectId > 0 && roleData.ProjectId === projectId){
 					return true;
 				}
 				return false;
@@ -80,21 +80,22 @@ module.exports = function(ruleAccess) {
 	 */
 	ruleAccess.addRule("POST/profiles", superAdminAllowed());
 	/**
-	 * projekt może utworzyć profileadmin profilu w którym ma być projekt lub super admin
+	 * tylko profileadmin profilu w danym profilu lub super admin
 	 */
 	ruleAccess.addRule("POST/users/profile_admin", RuleAccess.rule.anyOnRuleList([profileAdminAllowed(), superAdminAllowed()]));
 	/**
-	 * projekt może utworzyć profileadmin profilu w którym ma być projekt
+	 * tylko profileadmin profilu w danym profilu
 	 */
 	ruleAccess.addRule("POST/projects", profileAdminAllowed());
 	/**
-	 * ustawić w tryb budowy projekt, może tylko leader tego projektu
+	 * tylko leader tego projektu
 	 */
 	ruleAccess.addRule("POST/projects/mode/build", userProjectRoleAllowed('PROJECT_LEADER'));
 	/**
-	 * ustawić w tryb budowy projekt, może tylko leader tego projektu
+	 * tylko leader tego projektu
 	 */
 	ruleAccess.addRule("POST/projects/mode/service", userProjectRoleAllowed('PROJECT_LEADER'));
+	// ruleAccess.addRule("POST/projects/mode/service", RuleAccess.rule.alwaysAllow());
 	/**
 	 * tylko super admin ma dostęp do zasobu
 	 */
@@ -103,4 +104,16 @@ module.exports = function(ruleAccess) {
 	 * tylko super admin ma dostęp do zasobu
 	 */
 	ruleAccess.addRule("POST/projects/paymant", superAdminAllowed());
+	/**
+	 * tylko leader tego projektu
+	 */
+	ruleAccess.addRule("POST/users/coworker/create", userProjectRoleAllowed('PROJECT_LEADER'));
+	/**
+	 * tylko leader tego projektu
+	 */
+	ruleAccess.addRule("POST/users/coworker/accept", userProjectRoleAllowed('PROJECT_LEADER'));
+	/**
+	 * tylko leader tego projektu
+	 */
+	ruleAccess.addRule("POST/users/coworker/proposition", RuleAccess.rule.anyOnRuleList([userProjectRoleAllowed('PROFILE_ADMIN'), userProjectRoleAllowed('COWORKER')]));
 };

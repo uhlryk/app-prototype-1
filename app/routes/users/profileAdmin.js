@@ -22,33 +22,34 @@ router.post("/profile_admin", RuleAccess.isAllowed(), function(req, res, next){
 	if (errors) {
 		return res.sendValidationError({name : "ExpressValidationError", errors :errors});
 	}
-	req.app.get("actions").accounts.createProfileAdmin({
+	req.app.get("actions").projectAccounts.createProfileAdmin({
 		firstname : req.body.firstname,
 		lastname : req.body.lastname,
 		email : req.body.email,
 		phone : req.body.phone,
 		password : generatePassword(12, true),
-		ProfileId : profileId,
+		profileId : profileId,
 	})
-	.then(function(accountData){
-		if(accountData.sendSMS){
-			req.app.get('sms').send(accountData.phone, {
-				firstname : accountData.firstname,
-				lastname : accountData.lastname,
-				AccountId : accountData.id,
-				password : accountData.password,
-				phone : accountData.phone,
+	.then(function(account){
+		if(account.operation === 'CREATE_NEW' || account.operation === 'ACTIVE_PROPOSITION'){
+			req.app.get('sms').send(account.model.phone, {
+				firstname : account.model.firstname,
+				lastname : account.model.lastname,
+				AccountId : account.model.id,
+				password : account.password,
+				phone : account.model.phone,
 			}, function(err, message){
 				if(err){
 					//todo: zwrócić jakis błąd gdy sms nie wyjdzie
 				}
-				return res.sendData(200, {login: accountData.phone});
+				return res.sendData(200, {login: account.model.phone});
 			});
 		} else {
-			return res.sendData(200, {login: accountData.phone});
+			return res.sendData(200, {login: account.model.phone});
 		}
 	})
 	.catch(function(err){
+		console.log(err);
 		return res.sendValidationError(err);
 	});
 });

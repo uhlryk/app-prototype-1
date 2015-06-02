@@ -82,6 +82,19 @@ module.exports = function(server, url){
 				cb(res.body.login, res.body.id);
 			});
 		},
+		setProjectBuildMode : function(leaderToken, projectId, cb){
+			request.post(url + "/projects/mode/build")
+			.set('access-token', leaderToken)
+			.send({"project_id":projectId})
+			.send({"start_date": "2013-03-01"})
+			.send({"finish_date": "2013-05-01"})
+			.send({"investor_firmname": "inwestor testowy"})
+			.end(function(err, res){
+				expect(res.status).to.be.equal(200);
+				expect(res.body.id).to.be.above(0);
+				cb();
+			});
+		},
 		/**
 		 * Logowanie normalnego usera (różny od superadmin)
 		 * @param  {[string}   login    [description]

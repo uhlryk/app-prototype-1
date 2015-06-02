@@ -2,100 +2,62 @@ var bcrypt = require('bcrypt');
 /**
  * Tworzy projekt dla danego profilu
  * DOdatkowo tworzy konto lidera. musi sprawdzić czy lider istnieje
- *
- * @param  {
- *         name : nazwa danego projektu
- *         package: 'BASIC', 'PROFESSIONAL'
- *         profileId:idprofilu
- *
- *         firstname?:string,
- *         lastname?:string,
- *         email?:email,
- *         phone:normalizedphonenumber,//to jest podstawowy identyfikator
- *         }   data obiekt z danymi do wypełnienia
- * @param  {Function} cb     [description]
- * @param  {[type]}   models [description]
- * @return {[type]}          [description]
+ * data.phone
+ * data.firstname?
+ * data.lastname?
+ * data.email?
+ * data.password
+ * data.name
+ * data.package
+ * data.profileId
+ * return
+ * {accountModel: accountModel, projectModel:projectModel, accountOperation: [CREATE_NEW | ACTIVE_PROPOSITION | ACTIVE], password: password}
  */
 module.exports = function(data, transaction, models, actions){
-	var modelData;
-	var sendSMS = false;
-	var accountId, projectId;
-	return models.Account.find({
-		where : {
-			phone : data.phone
-		}
+	var accountOperation;
+	var accountModel;
+	var projectModel;
+	var password;
+
+	return models.Project.create({
+		name : data.name,
+		ProfileId : data.profileId,
+		package : data.package
 	}, {transaction : transaction})
-	.then(function(account){
-		if(account === null){//tworzymy nowe konto
-			return models.Account.create({
-				firstname : data.firstname,
-				lastname : data.lastname,
-				email : data.email,
-				phone : data.phone,
-				password : bcrypt.hashSync(data.password, 8)
-			}, {transaction : transaction})
-			.then(function(account){
-				modelData = {
-					AccountId : account.id,
-					firstname : account.firstname,
-					lastname : account.lastname,
-					password : data.password,
-					phone : data.phone,
-					sendSMS : true
-				};
-			});
-		} else if(account.status === 'DISABLE'){
-			//todo:testy gdy lider istnieje ale jest zablokowany
-			throw {name : "AwProccessError", type:"DISABLE_USER"};
-		} else if(account.status === 'INACTIVE'){//znaczy że user był tworzony na potrzeby innego zadania ale jego konto nie zostało aktywowane, bo powstało tylko jako propozycja której nikt nie zatwierdził
-			//test gdy lider istnieje ale jest nieaktywny
-			return account.updateAttributes({
-				status : "ACTIVE",
-				password : bcrypt.hashSync(data.password, 8)
-			}, {transaction : transaction})
-			.then(function(account){
-				modelData = {
-					AccountId : account.id,
-					firstname : account.firstname,
-					lastname : account.lastname,
-					password : data.password,
-					phone : data.phone,
-					sendSMS : true
-				};
-			});
-		} else if(account.status === 'ACTIVE'){//konto jest w porządku
-			modelData = {
-				AccountId : account.id,
-				phone : data.phone,
-				sendSMS : false
-			};
-			return account;
-		} else {//gdy np status inny
-			throw {name : "AwProccessError", type:"OTHER_ERROR"};
-		}
-	})
-	.then(function(){
-		accountId = modelData.AccountId;
-		return models.Project.create({
-			name : data.name,
-			ProfileId : data.ProfileId,
-			package : data.package
-		}, {transaction : transaction});
-	})
+	/**
+	 * Na tym etapie mamy projekt któremu zmieniliśmy tryb na SERVICE
+	 * Teraz jeśli jest taka potrzeba dodamy nowego PROJECT_LEADER
+	 */
 	.then(function(project){
-		projectId = project.id;
-		return models.ProjectAccount.create({
-			ProjectId : project.id,
-			AccountId : accountId,
-			status : 'ACTIVE',
-			role : 'PROJECT_LEADER'
-		}, {transaction : transaction});
+		projectModel = project;
+		return actions.projectAccounts.createProjectLeader({
+			transaction: transaction,
+			firstname : data.firstname,
+			lastname : data.lastname,
+			email : data.email,
+			phone : data.phone,
+			password : data.password,
+			projectId : project.id,
+		}, transaction);
+	})
+	.then(function(resultData){
+		accountOperation = resultData.operation;
+		accountModel = resultData.model;
+		password = resultData.password;
 	})
 	.then(function(){
-		modelData.ProjectId = projectId;
-		return new Promise(function(resolve) {
-			resolve(modelData);
+		return actions.projectAccounts.addAllProfileAdminOneProject({
+			projectId : projectModel.id
+		}, transaction);
+	})
+	.then(function(){
+		return new Promise(function(resolve){
+			resolve({
+				projectModel: projectModel,
+				accountModel: accountModel,
+				accountOperation: accountOperation,
+				password : password
+			});
 		});
 	});
 };

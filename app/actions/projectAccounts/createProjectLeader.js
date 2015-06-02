@@ -13,12 +13,13 @@
  * data.email
  * data.password
  * return
- * {model: accountModel, operation: [CREATE_NEW | ACTIVE_PROPOSITION | ACTIVE]}
+ * {model: accountModel, operation: [CREATE_NEW | ACTIVE_PROPOSITION | ACTIVE], password: password}
  */
 
 module.exports = function(data, transaction, models, actions){
 	var operation;
 	var accountModel;
+	var password;
 	/**
 	 * szukamy aktualnego PROJECT_LEADER
 	 */
@@ -55,6 +56,7 @@ module.exports = function(data, transaction, models, actions){
 						}
 					});
 					//jeśli wśród usuwanych ról nie było PROFILE_ADMIN to musimy dać temu userowi nową rolę COWORKER
+					//jak był PROFILE_ADMIN to nie został usunięty więc user ma w projekcie rolę
 					if(isProfileAdmin === false){
 						return actions.projectAccounts.createRole({
 							transaction: transaction,
@@ -86,6 +88,7 @@ module.exports = function(data, transaction, models, actions){
 	.then(function(resultData){
 		operation = resultData.operation;
 		accountModel = resultData.model;
+		password = resultData.password;
 		if(operation === 'PROPOSITION'){//istnieje konto ale jest ono jeszcze nieaktywne
 			operation = 'ACTIVE_PROPOSITION';
 			return accountModel.updateAttributes({
@@ -103,12 +106,12 @@ module.exports = function(data, transaction, models, actions){
 			projectId: data.projectId,
 			role : 'PROJECT_LEADER',
 			status: 'ACTIVE',
-			accountId: accountModel.AccountId
+			accountId: accountModel.id
 		}, transaction);
 	})
 	.then(function(){
 		return new Promise(function(resolve) {
-			resolve({model: accountModel, operation: operation});
+			resolve({model: accountModel, operation: operation, password: password});
 		});
 	});
 };

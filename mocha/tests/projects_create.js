@@ -180,6 +180,19 @@ describe("Create project test: ", function(){
 					done();
 				});
 			});
+			it("should create second profile admin to profile with projects", function(done){
+				request.post(url + "/users/profile_admin")
+				.set('access-token', profileAdminToken)
+				.send({profile_id : profileId})
+				.send({phone : "+48701511226"})
+				.end(function(err, res){
+					expect(res.status).to.be.equal(200);
+					expect(res.body.login).to.be.a("string");
+					var smsData = server.getSmsDebug(res.body.login);
+					expect(smsData.password).to.be.a("string");
+					done();
+				});
+			});
 		});
 	});
 

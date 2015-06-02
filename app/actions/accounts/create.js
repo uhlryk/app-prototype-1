@@ -9,7 +9,7 @@
  * data.password
  * data.status 'ACTIVE','PROPOSITION' czyli czy tworzymy użytkownika czy tylko go proponujemy, domyślnie baza odpali 'ACTIVE'
  * return
- * {model: accountModel, operation: [CREATE_NEW | PROPOSITION | ACTIVE]}
+ * {model: accountModel, operation: [CREATE_NEW | PROPOSITION | ACTIVE], password: password}
  */
 
 var bcrypt = require('bcrypt');
@@ -20,6 +20,7 @@ module.exports = function(data, transaction, models, actions){
 	 */
 	var operation;
 	var accountModel;
+	var password = data.password;
 	return models.Account.find({
 		where : {
 			phone : data.phone
@@ -36,6 +37,9 @@ module.exports = function(data, transaction, models, actions){
 			};
 			if(data.status){
 				modelData.status = data.status;
+			}
+			if(data.profileId){
+				modelData.ProfileId = data.profileId;
 			}
 			/**
 			 * oznacza że nie ma dla danegu telefonu konta, musimy więc utworzyć nowe konto
@@ -63,7 +67,7 @@ module.exports = function(data, transaction, models, actions){
 	})
 	.then(function(){
 		return new Promise(function(resolve) {
-			resolve({model: accountModel, operation: operation});
+			resolve({model: accountModel, operation: operation, password: password});
 		});
 	});
-}
+};

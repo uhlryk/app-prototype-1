@@ -32,7 +32,7 @@ router.post("/", RuleAccess.isAllowed(), function(req, res){
 		//dane dla projektu
 		name : req.body.name,
 		package : req.body.package,
-		ProfileId : profileId,
+		profileId : profileId,
 		//tu dane dla lidera
 		firstname : req.body.firstname,
 		lastname : req.body.lastname,
@@ -41,21 +41,21 @@ router.post("/", RuleAccess.isAllowed(), function(req, res){
 		password : generatePassword(12, true),
 	})
 	.then(function(data){
-		if(data.sendSMS){
-			req.app.get('sms').send(data.phone, {
-				firstname : data.firstname,
-				lastname : data.lastname,
-				AccountId : data.id,
+		if(data.accountOperation === 'CREATE_NEW' || data.accountOperation === 'ACTIVE_PROPOSITION'){
+			req.app.get('sms').send(data.accountModel.phone, {
+				firstname : data.accountModel.firstname,
+				lastname : data.accountModel.lastname,
+				accountId : data.accountModel.id,
 				password : data.password,
-				phone : data.phone,
+				phone : data.accountModel.phone,
 			}, function(err, message){
 				if(err){
 					//todo: zwrócić jakis błąd gdy sms nie wyjdzie
 				}
-				return res.sendData(200, {login: data.phone, id: data.ProjectId});
+				return res.sendData(200, {login: data.accountModel.phone, id: data.projectModel.id});
 			});
 		} else {
-			return res.sendData(200, {login: data.phone, id: data.ProjectId});
+			return res.sendData(200, {login: data.accountModel.phone, id: data.projectModel.id});
 		}
 	})
 	.catch(function(err){
