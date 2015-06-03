@@ -7,6 +7,7 @@
  * data.projectId id projektu dla którego ma być ustawiony leader
  * dane dla nowego leadera
  * data.phone
+ * data.firmname
  * opcjonalne:
  * data.firstname
  * data.lastname
@@ -40,7 +41,6 @@ module.exports = function(data, transaction, models, actions){
 			//projekt ma jednego lub więcej PROJECT_LEADER, poniżej usuwamy im rolę i dajemy rolę COWORKER
 			return models.sequelize.Promise.map(projectAccountList, function(projectAccount) {
 				actions.projectAccounts.deleteRole({
-					transaction: transaction,
 					projectId: data.projectId,
 					accountId: projectAccount.AccountId,
 				}, transaction)
@@ -59,8 +59,11 @@ module.exports = function(data, transaction, models, actions){
 					//jak był PROFILE_ADMIN to nie został usunięty więc user ma w projekcie rolę
 					if(isProfileAdmin === false){
 						return actions.projectAccounts.createRole({
-							transaction: transaction,
 							projectId: data.projectId,
+							firstname : data.firstname,
+							lastname : data.lastname,
+							email : data.email,
+							firmname:data.firmname,
 							role : 'COWORKER',
 							status: 'ACTIVE',
 							accountId: projectAccount.AccountId
@@ -76,9 +79,9 @@ module.exports = function(data, transaction, models, actions){
 	.then(function(){
 		//najpierw próbujemy utworzyć nowe Account dla użytkownika który ma być liderem (metoda sprawdzi czy konto już ma)
 		return actions.accounts.create({
-			transaction: transaction,
 			firstname : data.firstname,
 			lastname : data.lastname,
+			firmname:data.firmname,
 			email : data.email,
 			phone : data.phone,
 			password : data.password,
@@ -102,9 +105,12 @@ module.exports = function(data, transaction, models, actions){
 	 */
 	.then(function(){
 		return actions.projectAccounts.createRole({
-			transaction: transaction,
 			projectId: data.projectId,
 			role : 'PROJECT_LEADER',
+			firstname : data.firstname,
+			lastname : data.lastname,
+			firmname:data.firmname,
+			email : data.email,
 			status: 'ACTIVE',
 			accountId: accountModel.id
 		}, transaction);

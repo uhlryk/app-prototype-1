@@ -58,6 +58,7 @@ roles.forEach(function(role){
 				.send({firstname : "Adam"})
 				.send({lastname : "Kowalski"})
 				.send({phone : "+48701611386"})
+				.send({firmname : "FirmaA"})
 				.end(function(err, res){
 					expect(res.status).to.be.equal(401);
 					expect(res.body.message).to.be.equal("NOT_AUTHORIZED");
@@ -70,6 +71,7 @@ roles.forEach(function(role){
 				.send({firstname : "Adam"})
 				.send({lastname : "Kowalski"})
 				.send({phone : "+48701611386"})
+				.send({firmname : "FirmaA"})
 				.end(function(err, res){
 					expect(res.status).to.be.equal(401);
 					expect(res.body.message).to.be.equal("NOT_AUTHORIZED");
@@ -83,6 +85,7 @@ roles.forEach(function(role){
 				.send({firstname : "Adam"})
 				.send({lastname : "Kowalski"})
 				.send({phone : "+48701611386"})
+				.send({firmname : "FirmaA"})
 				.end(function(err, res){
 					expect(res.status).to.be.equal(401);
 					expect(res.body.message).to.be.equal("NOT_AUTHORIZED");
@@ -95,6 +98,21 @@ roles.forEach(function(role){
 				.send({"project_id": projectId})
 				.send({firstname : "Adam"})
 				.send({lastname : "Kowalski"})
+				.send({firmname : "FirmaA"})
+				.end(function(err, res){
+					expect(res.status).to.be.equal(422);
+					expect(res.body.message).to.be.equal("VALIDATION_ERROR");
+					expect(res.body.errors).to.include.some.property("type", "REQUIRE_FIELD");
+					done();
+				});
+			});
+			it("should not create " + role + " when firmname is't send", function(done){
+				request.post(url + "/users/" + role + "/create")
+				.set('access-token', leaderToken)
+				.send({"project_id": projectId})
+				.send({firstname : "Adam"})
+				.send({lastname : "Kowalski"})
+				.send({phone : "+48701611386"})
 				.end(function(err, res){
 					expect(res.status).to.be.equal(422);
 					expect(res.body.message).to.be.equal("VALIDATION_ERROR");
@@ -107,6 +125,7 @@ roles.forEach(function(role){
 				.set('access-token', leaderToken)
 				.send({"project_id": projectId})
 				.send({phone : "+48701011386"})
+				.send({firmname : "FirmaA"})
 				.end(function(err, res){
 					expect(res.status).to.be.equal(200);
 					expect(res.body.login).to.be.a("string");
@@ -124,6 +143,7 @@ roles.forEach(function(role){
 				.send({firstname : "Adam"})
 				.send({lastname : "Kowalski"})
 				.send({phone : "+48702611386"})
+				.send({firmname : "FirmaA"})
 				.end(function(err, res){
 					expect(res.status).to.be.equal(401);
 					expect(res.body.message).to.be.equal("NOT_AUTHORIZED");
@@ -136,6 +156,7 @@ roles.forEach(function(role){
 				.send({firstname : "Adam"})
 				.send({lastname : "Kowalski"})
 				.send({phone : "+48702611386"})
+				.send({firmname : "FirmaA"})
 				.end(function(err, res){
 					expect(res.status).to.be.equal(401);
 					expect(res.body.message).to.be.equal("NOT_AUTHORIZED");
@@ -161,6 +182,7 @@ roles.forEach(function(role){
 				.set('access-token', profileAdminToken)
 				.send({"project_id": projectId})
 				.send({phone : "+48702011386"})
+				.send({firmname : "FirmaA"})
 				.end(function(err, res){
 					expect(res.status).to.be.equal(200);
 					expect(res.body.login).to.be.a("string");
@@ -178,6 +200,7 @@ roles.forEach(function(role){
 					.set('access-token', profileAdminToken)
 					.send({"project_id": projectId})
 					.send({phone : "+48702011386"})
+					.send({firmname : "FirmaA"})
 					.end(function(err, res){
 						expect(res.status).to.be.equal(200);
 						expect(res.body.login).to.be.a("string");

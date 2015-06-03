@@ -7,18 +7,11 @@ var RuleAccess = require('ruleaccess');
 var router = new express.Router();
 
 router.post("/paymant", RuleAccess.isAllowed(), function(req, res){
-	req.checkBody('project_id', 'INVALID_FIELD').isId();
-	req.sanitize('project_id').toInt();
-	req.checkBody('paid_date', 'INVALID_FIELD').isDate();
-	req.sanitize('paid_date').toDate();
-	var projectId = req.body.project_id;
-	var errors = req.validationErrors();
-	if (errors) {
-		return res.sendValidationError({name : "ExpressValidationError", errors :errors});
-	}
+	if(!req.validate(['project_id', 'paid_date']))return;
+
 	req.app.get("actions").projects.setPaidDate({
-		projectId : projectId,
-		paid_date : req.body.start_date,
+		projectId : req.body.project_id,
+		paid_date : req.body.paid_date,
 	})
 	.then(function(ProjectId){
 		return res.sendData(200, {id: ProjectId});

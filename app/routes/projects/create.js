@@ -5,6 +5,7 @@
  * name
  * package
  * phone
+ * firmname
  * firstname
  * lastname
  * email
@@ -22,26 +23,17 @@ var RuleAccess = require('ruleaccess');
 var generatePassword = require('password-generator');
 
 router.post("/", RuleAccess.isAllowed(), function(req, res){
-	req.checkBody('profile_id', 'INVALID_FIELD').isId();
-	req.sanitize('profile_id').toInt();
-	req.sanitize("phone").normalizePhone();
-	req.checkBody('phone', 'REQUIRE_FIELD').notEmpty();
-	var profileId = req.body.profile_id;
-	var login = req.body.phone;
-	var errors = req.validationErrors();
-	if (errors) {
-		return res.sendValidationError({name : "ExpressValidationError", errors :errors});
-	}
+	if(!req.validate(['phone', 'firmname', 'profile_id']))return;
+
 	req.app.get("actions").projects.create({
-		//dane dla projektu
-		name : req.body.name,
+		projectname : req.body.name,
 		package : req.body.package,
-		profileId : profileId,
-		//tu dane dla lidera
+		profileId : req.body.profile_id,
+		firmname : req.body.firmname,
 		firstname : req.body.firstname,
 		lastname : req.body.lastname,
 		email : req.body.email,
-		phone : login,
+		phone : req.body.phone,
 		password : generatePassword(12, true),
 	})
 	.then(function(data){

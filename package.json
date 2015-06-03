@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node app.js"
+    "start": "node app.js",
+    "test": "DEBUG=server NODE_ENV=development ./node_modules/.bin/mocha --check-leaks --timeout 7000 mocha/tests"
   },
   "dependencies": {
     "bcrypt": "^0.8.3",

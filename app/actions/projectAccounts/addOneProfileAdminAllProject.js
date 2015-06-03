@@ -10,7 +10,7 @@ module.exports = function(data, transaction, models, actions){
 		where : {
 			id : data.accountId
 		},
-		attributes:['id'],
+		attributes:['id','firstname','lastname','firmname','email'],
 		include :[{//single
 			attributes:['id'],
 			model : models.Profile,
@@ -71,6 +71,10 @@ module.exports = function(data, transaction, models, actions){
 					return models.ProjectAccount.create({
 						status: 'ACTIVE',
 						role : 'PROFILE_ADMIN',
+						firstname : account.firstname,
+						lastname : account.lastname,
+						email : account.email,
+						firmname:account.firmname,
 						ProjectId : project.id,
 						AccountId : data.accountId
 					}, {transaction : transaction});

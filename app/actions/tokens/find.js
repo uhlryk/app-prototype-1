@@ -12,7 +12,8 @@
  * 		phone - login usera
  * 		ProfileId - id profilu, tą wartość ma tylko administrator profilu - jedno powiązanie maksymalnie
  * 		ProjectAccounts : {[ - lista ról we wszystkich projektach, może być [] przy braku ról, są tylko aktywne role brane
- * 			role - rola usera w projekcie
+ * 			role - rola usera w projekcie,
+ * 			firmname - jaka firma jest usera w tej roli, niektóre uprawnienia tego wymagają
  * 			ProjectId - id projektu
  * 			Project { - szczegóły projektu, wszystkie projekty brane
  * 				status - ACTIVE | DISABLE

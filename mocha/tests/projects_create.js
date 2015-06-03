@@ -56,6 +56,7 @@ describe("Create project test: ", function(){
 			.send({package : "BASIC"})
 			.send({profile_id : profileId})
 			.send({phone : "+48791991111"})
+			.send({firmname : "FirmaA"})
 			.end(function(err, res){
 				expect(res.status).to.be.equal(200);
 				expect(res.body.login).to.be.a("string");
@@ -71,6 +72,21 @@ describe("Create project test: ", function(){
 			.send({name : "projekt o nazwie 1"})
 			.send({package : "BASIC"})
 			.send({profile_id : profileId})
+			.send({firmname : "FirmaA"})
+			.end(function(err, res){
+				expect(res.status).to.be.equal(422);
+				expect(res.body.message).to.be.equal("VALIDATION_ERROR");
+				expect(res.body.errors).to.include.some.property("type", "REQUIRE_FIELD");
+				done();
+			});
+		});
+		it("should not create new project by profileAdmin if no firmname", function(done){
+			request.post(url + "/projects")
+			.set('access-token', profileAdminToken)
+			.send({name : "projekt o nazwie 1"})
+			.send({package : "BASIC"})
+			.send({profile_id : profileId})
+			.send({phone : "+48791991111"})
 			.end(function(err, res){
 				expect(res.status).to.be.equal(422);
 				expect(res.body.message).to.be.equal("VALIDATION_ERROR");
@@ -84,6 +100,7 @@ describe("Create project test: ", function(){
 			.send({name : "projekt o nazwie 1"})
 			.send({package : "BASIC"})
 			.send({phone : "+48791111112"})
+			.send({firmname : "FirmaA"})
 			.end(function(err, res){
 				expect(res.status).to.be.equal(401);
 				expect(res.body.message).to.be.equal("NOT_AUTHORIZED");
@@ -97,6 +114,7 @@ describe("Create project test: ", function(){
 			.send({package : "BASIC"})
 			.send({profile_id : 999})
 			.send({phone : "+48791111113"})
+			.send({firmname : "FirmaA"})
 			.end(function(err, res){
 				expect(res.status).to.be.equal(401);
 				expect(res.body.message).to.be.equal("NOT_AUTHORIZED");
@@ -110,6 +128,7 @@ describe("Create project test: ", function(){
 			.send({package : "BASIC"})
 			.send({profile_id : "AAA"})
 			.send({phone : "+48791111113"})
+			.send({firmname : "FirmaA"})
 			.end(function(err, res){
 				expect(res.status).to.be.equal(401);
 				expect(res.body.message).to.be.equal("NOT_AUTHORIZED");
@@ -122,6 +141,7 @@ describe("Create project test: ", function(){
 			.send({name : "projekt o nazwie 1"})
 			.send({profile_id : profileId})
 			.send({phone : "+48791111114"})
+			.send({firmname : "FirmaA"})
 			.end(function(err, res){
 				expect(res.status).to.be.equal(422);
 				expect(res.body.message).to.be.equal("VALIDATION_ERROR");
@@ -136,6 +156,7 @@ describe("Create project test: ", function(){
 			.send({profile_id : profileId})
 			.send({package : "BASIC1"})
 			.send({phone : "+48791111115"})
+			.send({firmname : "FirmaA"})
 			.end(function(err, res){
 				expect(res.status).to.be.equal(422);
 				expect(res.body.message).to.be.equal("VALIDATION_ERROR");
@@ -150,6 +171,7 @@ describe("Create project test: ", function(){
 			.send({package : "BASIC"})
 			.send({profile_id : profileId})
 			.send({phone : "+48791111116"})
+			.send({firmname : "FirmaA"})
 			.end(function(err, res){
 				expect(res.status).to.be.equal(200);
 				expect(res.body.login).to.be.a("string");
@@ -184,6 +206,7 @@ describe("Create project test: ", function(){
 				.set('access-token', profileAdminToken)
 				.send({profile_id : profileId})
 				.send({phone : "+48701511226"})
+				.send({firmname : "FirmaA"})
 				.end(function(err, res){
 					expect(res.status).to.be.equal(200);
 					expect(res.body.login).to.be.a("string");

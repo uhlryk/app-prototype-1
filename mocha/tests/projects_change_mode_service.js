@@ -56,6 +56,7 @@ describe("project Change mode to service test: ", function(){
 			.send({"warranty_date": "2015-03-01"})
 			.send({"is_new_leader": true})
 			.send({phone : "+48791881116"})
+			.send({firmname : "FirmaA"})
 			.end(function(err, res){
 				expect(res.status).to.be.equal(401);
 				expect(res.body.message).to.be.equal("NOT_AUTHORIZED");
@@ -68,6 +69,21 @@ describe("project Change mode to service test: ", function(){
 			.send({"project_id":projectId})
 			.send({"warranty_date": "2015-03-01"})
 			.send({"is_new_leader": true})
+			.send({firmname : "FirmaA"})
+			.end(function(err, res){
+				expect(res.status).to.be.equal(422);
+				expect(res.body.message).to.be.equal("VALIDATION_ERROR");
+				expect(res.body.errors).to.include.some.property("type", "REQUIRE_FIELD");
+				done();
+			});
+		});
+		it("should not change mode from BUILD to SERVICE when is_new_leader but not firmname", function(done){
+			request.post(url + "/projects/mode/service")
+			.set('access-token', leaderToken)
+			.send({"project_id":projectId})
+			.send({"warranty_date": "2015-03-01"})
+			.send({"is_new_leader": true})
+			.send({phone : "+48791881112"})
 			.end(function(err, res){
 				expect(res.status).to.be.equal(422);
 				expect(res.body.message).to.be.equal("VALIDATION_ERROR");
@@ -82,6 +98,7 @@ describe("project Change mode to service test: ", function(){
 			.send({"warranty_date": "2015-03-01"})
 			.send({"is_new_leader": true})
 			.send({phone : "+48781116"})
+			.send({firmname : "FirmaA"})
 			.end(function(err, res){
 				expect(res.status).to.be.equal(422);
 				expect(res.body.message).to.be.equal("VALIDATION_ERROR");
@@ -96,6 +113,7 @@ describe("project Change mode to service test: ", function(){
 			.send({"warranty_date": "2015-03-01"})
 			.send({"is_new_leader": true})
 			.send({phone : "+48791881116"})
+			.send({firmname : "FirmaA"})
 			.end(function(err, res){
 				expect(res.status).to.be.equal(422);
 				expect(res.body.message).to.be.equal("PROCESS_ERROR");
@@ -122,6 +140,7 @@ describe("project Change mode to service test: ", function(){
 				.send({"warranty_date": "2015-03-01"})
 				.send({"is_new_leader": true})
 				.send({phone : "+48791881116"})
+				.send({firmname : "FirmaA"})
 				.end(function(err, res){
 					expect(res.status).to.be.equal(200);
 					done();

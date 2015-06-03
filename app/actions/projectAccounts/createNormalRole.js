@@ -11,6 +11,7 @@
  * data.firstname
  * data.lastname
  * data.email
+ * data.firmname
  * return
  * {model: accountModel, roleModel:role, operation: operation, password: password}
  */
@@ -22,6 +23,7 @@ module.exports = function(data, transaction, models, actions){
 		firstname : data.firstname,
 		lastname : data.lastname,
 		email : data.email,
+		firmname : data.firmname,
 		phone : data.phone,
 		password : data.password,
 		status : data.status
@@ -67,6 +69,10 @@ module.exports = function(data, transaction, models, actions){
 		return actions.projectAccounts.createRole({
 			projectId:data.projectId,
 			role:data.role,
+			firstname : data.firstname,
+			lastname : data.lastname,
+			email : data.email,
+			firmname : data.firmname,
 			status:data.status,
 			accountId:accountModel.id
 		}, transaction);

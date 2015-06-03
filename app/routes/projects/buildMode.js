@@ -13,19 +13,8 @@ var router = new express.Router();
 var RuleAccess = require('ruleaccess');
 
 router.post("/mode/build", RuleAccess.isAllowed(), function(req, res){
-	req.checkBody('project_id', 'INVALID_FIELD').isId();
-	req.sanitize('project_id').toInt();
-	req.checkBody('start_date', 'INVALID_FIELD').isDate();
-	req.sanitize('start_date').toDate();
-	req.checkBody('finish_date', 'INVALID_FIELD').isDate();
-	req.sanitize('finish_date').toDate();
-	req.checkBody('finish_date', 'REQUIRE_DATE_GREATER').isDateGreaterThen(req.body.start_date);
-	req.sanitize('investor_firmname').escape();
-	var projectId = req.body.project_id;
-	var errors = req.validationErrors();
-	if (errors) {
-		return res.sendValidationError({name : "ExpressValidationError", errors :errors});
-	}
+	if(!req.validate(['project_id', 'start_date', 'finish_date', 'investor_firmname']))return;
+
 	req.app.get("actions").projects.setBuildMode({
 		projectId : req.body.project_id,
 		start_date : req.body.start_date,

@@ -58,7 +58,9 @@ describe("Create profile admin test: ", function(){
 			request.post(url + "/users/profile_admin")
 			.set('access-token', superUserToken)
 			.send({profile_id : 999})
+			.send({firmname : "firma1"})
 			.send({phone : "+48791633380"})
+			.send({firmname : "FirmaA"})
 			.end(function(err, res){
 				expect(res.status).to.be.equal(422);
 				expect(res.body.message).to.be.equal("PROCESS_ERROR");
@@ -79,9 +81,11 @@ describe("Create profile admin test: ", function(){
 				.set('access-token', superUserToken)
 				.send({profile_id : profileId})
 				.send({firstname : "Adam"})
+				.send({firmname : "firma1"})
 				.send({lastname : "Kowalski"})
 				.send({email : "kowalski@kowalski.email"})
 				.send({phone : "+48701633386"})
+				.send({firmname : "FirmaA"})
 				.end(function(err, res){
 					expect(res.status).to.be.equal(200);
 					expect(res.body.login).to.be.a("string");
@@ -98,6 +102,22 @@ describe("Create profile admin test: ", function(){
 				.send({firstname : "Adam"})
 				.send({lastname : "Kowalski"})
 				.send({email : "kowalski@kowalski.email"})
+				.send({firmname : "FirmaA"})
+				.end(function(err, res){
+					expect(res.status).to.be.equal(422);
+					expect(res.body.message).to.be.equal("VALIDATION_ERROR");
+					expect(res.body.errors).to.include.some.property("type", "REQUIRE_FIELD");
+					done();
+				});
+			});
+			it("should not allow to create profile_admin when not send firmname", function(done){
+				request.post(url + "/users/profile_admin")
+				.set('access-token', superUserToken)
+				.send({profile_id : profileId})
+				.send({firstname : "Adam"})
+				.send({lastname : "Kowalski"})
+				.send({email : "kowalski@kowalski.email"})
+				.send({phone : "+487016386"})
 				.end(function(err, res){
 					expect(res.status).to.be.equal(422);
 					expect(res.body.message).to.be.equal("VALIDATION_ERROR");
@@ -113,6 +133,7 @@ describe("Create profile admin test: ", function(){
 				.send({lastname : "Kowalski"})
 				.send({email : "kowalski@kowalski.email"})
 				.send({phone : "+487016386"})
+				.send({firmname : "FirmaA"})
 				.end(function(err, res){
 					expect(res.status).to.be.equal(422);
 					expect(res.body.message).to.be.equal("VALIDATION_ERROR");
@@ -128,6 +149,7 @@ describe("Create profile admin test: ", function(){
 				.send({lastname : "Kowalski"})
 				.send({email : "kowalskikowalski.email"})
 				.send({phone : "+48701611386"})
+				.send({firmname : "FirmaA"})
 				.end(function(err, res){
 					expect(res.status).to.be.equal(422);
 					expect(res.body.message).to.be.equal("VALIDATION_ERROR");
@@ -139,9 +161,11 @@ describe("Create profile admin test: ", function(){
 				request.post(url + "/users/profile_admin")
 				.set('access-token', superUserToken)
 				.send({profile_id : profileId})
+				.send({firmname : "firma1"})
 				.send({firstname : "Adam"})
 				.send({lastname : "Kowalski"})
 				.send({phone : "+48701611386"})
+				.send({firmname : "FirmaA"})
 				.end(function(err, res){
 					expect(res.status).to.be.equal(200);
 					expect(res.body.login).to.be.a("string");
@@ -150,11 +174,13 @@ describe("Create profile admin test: ", function(){
 					done();
 				});
 			});
-			it("should allow to create profile_admin when only phone", function(done){
+			it("should allow to create profile_admin when only phone & firmname", function(done){
 				request.post(url + "/users/profile_admin")
 				.set('access-token', superUserToken)
 				.send({profile_id : profileId})
+				.send({firmname : "firma1"})
 				.send({phone : "+48701011386"})
+				.send({firmname : "FirmaA"})
 				.end(function(err, res){
 					expect(res.status).to.be.equal(200);
 					expect(res.body.login).to.be.a("string");
@@ -169,16 +195,20 @@ describe("Create profile admin test: ", function(){
 				.send({profile_id : profileId})
 				.send({firstname : "Adam"})
 				.send({lastname : "Kowalski"})
+				.send({firmname : "firma1"})
 				.send({email : "kowalski@kowalski.email"})
 				.send({phone : "+48791611386"})
+				.send({firmname : "FirmaA"})
 				.end(function(err, res){
 					request.post(url + "/users/profile_admin")
 					.set('access-token', superUserToken)
 					.send({profile_id : profileId})
 					.send({firstname : "Adam"})
 					.send({lastname : "Kowalski"})
+					.send({firmname : "firma1"})
 					.send({email : "kowalski@kowalski.email"})
 					.send({phone : "+48791611386"})
+					.send({firmname : "FirmaA"})
 					.end(function(err, res){
 						expect(res.status).to.be.equal(422);
 						expect(res.body.message).to.be.equal("PROCESS_ERROR");
@@ -260,6 +290,7 @@ describe("Create profile admin test: ", function(){
 				.set('access-token', profileAdminToken)
 				.send({profile_id : secondProfileId})
 				.send({phone : "+48701011316"})
+				.send({firmname : "firmaA"})
 				.end(function(err, res){
 					expect(res.status).to.be.equal(401);
 					expect(res.body.message).to.be.equal("NOT_AUTHORIZED");
@@ -271,6 +302,7 @@ describe("Create profile admin test: ", function(){
 				.set('access-token', profileAdminToken)
 				.send({profile_id : profileId})
 				.send({phone : "+48701011326"})
+				.send({firmname : "firmaA"})
 				.end(function(err, res){
 					expect(res.status).to.be.equal(200);
 					expect(res.body.login).to.be.a("string");

@@ -15,5 +15,4 @@ router.use("/users/", require("./users/inspector.js"));
 router.use("/users/", require("./users/designer.js"));
 router.use("/users/", require("./users/subcontractor.js"));
 
-
 module.exports = router;

@@ -61,6 +61,7 @@ module.exports = function(server, url){
 			.set('access-token', adminToken)
 			.send({profile_id : profileId})
 			.send({phone : phone})
+			.send({firmname : "firmaA"})
 			.end(function(err, res){
 				expect(res.status).to.be.equal(200);
 				expect(res.body.login).to.be.a("string");
@@ -74,6 +75,7 @@ module.exports = function(server, url){
 			.send({package : packageName})
 			.send({profile_id : profileId})
 			.send({phone : "+48791111111"})
+			.send({firmname : "firmaA"})
 			.end(function(err, res){
 				// console.log(res.body);
 				expect(res.status).to.be.equal(200);

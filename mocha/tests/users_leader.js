@@ -59,6 +59,7 @@ describe("Leader test: ", function(){
 			.send({package : "BASIC"})
 			.send({profile_id : profileId})
 			.send({phone : "+48791111191"})
+			.send({firmname : "FirmaA"})
 			.end(function(err, res){
 				expect(res.status).to.be.equal(401);
 				expect(res.body.message).to.be.equal("NOT_AUTHORIZED");
@@ -72,6 +73,7 @@ describe("Leader test: ", function(){
 			.send({package : "BASIC"})
 			.send({profile_id : profileId})
 			.send({phone : "+48791111111"})
+			.send({firmname : "FirmaA"})
 			.end(function(err, res){
 				expect(res.status).to.be.equal(200);
 				expect(res.body.login).to.be.a("string");

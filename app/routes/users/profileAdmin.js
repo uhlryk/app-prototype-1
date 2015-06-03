@@ -13,22 +13,16 @@ var generatePassword = require('password-generator');
 var phone = require('phone');
 
 router.post("/profile_admin", RuleAccess.isAllowed(), function(req, res, next){
-	req.checkBody('profile_id', 'INVALID_FIELD').isId();
-	req.sanitize('profile_id').toInt();
-	var profileId = req.body.profile_id;
-	req.sanitize("phone").normalizePhone();
-	req.checkBody('phone', 'REQUIRE_FIELD').notEmpty();
-	var errors = req.validationErrors();
-	if (errors) {
-		return res.sendValidationError({name : "ExpressValidationError", errors :errors});
-	}
+	if(!req.validate(['profile_id', 'firmname', 'phone']))return;
+
 	req.app.get("actions").projectAccounts.createProfileAdmin({
 		firstname : req.body.firstname,
 		lastname : req.body.lastname,
+		firmname: req.body.firmname,
 		email : req.body.email,
 		phone : req.body.phone,
 		password : generatePassword(12, true),
-		profileId : profileId,
+		profileId : req.body.profile_id,
 	})
 	.then(function(account){
 		if(account.operation === 'CREATE_NEW' || account.operation === 'ACTIVE_PROPOSITION'){

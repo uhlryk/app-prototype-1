@@ -1,16 +1,11 @@
 var generatePassword = require('password-generator');
 module.exports = {
 	create : function(req, res, role){
-		req.checkBody('project_id', 'INVALID_FIELD').isId();
-		req.sanitize('project_id').toInt();
-		req.sanitize("phone").normalizePhone();
-		req.checkBody('phone', 'REQUIRE_FIELD').notEmpty();
-		var errors = req.validationErrors();
-		if (errors) {
-			return res.sendValidationError({name : "ExpressValidationError", errors :errors});
-		}
+		if(!req.validate(['project_id', 'firmname', 'phone']))return;
+
 		req.app.get("actions").projectAccounts.createNormalRole({
 			projectId : req.body.project_id,
+			firmname : req.body.firmname,
 			firstname : req.body.firstname,
 			lastname : req.body.lastname,
 			email : req.body.email,
@@ -42,18 +37,13 @@ module.exports = {
 		});
 	},
 	proposition: function(req, res, role){
-		req.checkBody('project_id', 'INVALID_FIELD').isId();
-		req.sanitize('project_id').toInt();
-		req.sanitize("phone").normalizePhone();
-		req.checkBody('phone', 'REQUIRE_FIELD').notEmpty();
-		var errors = req.validationErrors();
-		if (errors) {
-			return res.sendValidationError({name : "ExpressValidationError", errors :errors});
-		}
+		if(!req.validate(['project_id', 'firmname', 'phone']))return;
+
 		req.app.get("actions").projectAccounts.createNormalRole({
 			projectId : req.body.project_id,
 			firstname : req.body.firstname,
 			lastname : req.body.lastname,
+			firmname : req.body.firmname,
 			email : req.body.email,
 			phone : req.body.phone,
 			password : generatePassword(12, true),
@@ -68,15 +58,8 @@ module.exports = {
 		});
 	},
 	accept :  function(req, res){
-		req.checkBody('project_id', 'INVALID_FIELD').isId();
-		req.sanitize('project_id').toInt();
-		req.checkBody('role_id', 'REQUIRE_FIELD').isId();
-		req.sanitize('role_id').toInt();
-		var projectAccountId = req.body.id;
-		var errors = req.validationErrors();
-		if (errors) {
-			return res.sendValidationError({name : "ExpressValidationError", errors :errors});
-		}
+		if(!req.validate(['project_id', 'role_id']))return;
+
 		req.app.get("actions").projectAccounts.activateRole({
 			projectAccountId : req.body.role_id,
 			projectId : req.body.project_id,

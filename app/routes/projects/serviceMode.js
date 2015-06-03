@@ -15,26 +15,19 @@ var generatePassword = require('password-generator');
 var phone = require('phone');
 
 router.post("/mode/service", RuleAccess.isAllowed(), function(req, res){
-	req.checkBody('project_id', 'INVALID_FIELD').isId();
-	req.sanitize('project_id').toInt();
-	var projectId = req.body.project_id;
-	req.checkBody('warranty_date', 'INVALID_FIELD').isDate();
-	req.sanitize('warranty_date').toDate();
 	req.sanitize("is_new_leader").toBoolean();
-	var isNewLeader = req.body.is_new_leader;
-	if(isNewLeader){
-		req.sanitize("phone").normalizePhone();
-		req.checkBody('phone', 'REQUIRE_FIELD').notEmpty();
+	if(req.body.is_new_leader){
+		if(!req.validate(['project_id', 'firmname', 'warranty_date', 'phone']))return;
+	} else {
+		if(!req.validate(['project_id', 'firmname', 'warranty_date']))return;
 	}
-	var errors = req.validationErrors();
-	if (errors) {
-		return res.sendValidationError({name : "ExpressValidationError", errors :errors});
-	}
+
 	req.app.get("actions").projects.setServiceMode({
-		projectId : projectId,
+		projectId : req.body.project_id,
 		warranty_date : req.body.warranty_date,
-		isNewLeader : isNewLeader,
+		isNewLeader : req.body.is_new_leader,
 		//tu dane dla lidera
+		firmname : req.body.firmname,
 		firstname : req.body.firstname,
 		lastname : req.body.lastname,
 		email : req.body.email,

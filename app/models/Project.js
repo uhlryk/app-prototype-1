@@ -22,7 +22,7 @@ module.exports = function(sequelize, DataTypes) {
 			allowNull: false
 		},
 		name : {
-			type : DataTypes.STRING(50),
+			type : DataTypes.STRING(45),
 			allowNull : true,
 			validate : {
 			}
@@ -41,7 +41,7 @@ module.exports = function(sequelize, DataTypes) {
 			type : DataTypes.DATE
 		},
 		investor_firmname : {
-			type : DataTypes.STRING(50),
+			type : DataTypes.STRING(45),
 			allowNull : true,
 		},
 	}, {

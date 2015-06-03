@@ -40,6 +40,10 @@ module.exports = function(sequelize, DataTypes) {
 			type: DataTypes.STRING(15),
 			allowNull: false
 		},
+		firmname: {
+			type: DataTypes.STRING(45),
+			allowNull: false
+		},
 	}, {
 		paranoid: true,
 		freezeTableName: true,

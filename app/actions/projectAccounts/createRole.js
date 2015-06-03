@@ -14,6 +14,10 @@
  * data.role 'PROFILE_ADMIN', 'PROJECT_LEADER', 'COWORKER', 'INVESTOR', 'INSPECTOR', 'DESIGNER', 'SUBCONTRACTOR'
  * data.status 'ACTIVE','PROPOSITION' czyli czy tworzymy użytkownika czy tylko go proponujemy
  * data.accountId niezbędne pole, do identyfikacji i do utworzenia konta
+ * data.firstname
+ * data.lastname
+ * data.email
+ * data.firmname
  */
 
 module.exports = function(data, transaction, models, actions){
@@ -23,6 +27,10 @@ module.exports = function(data, transaction, models, actions){
 		return models.ProjectAccount.create({
 			status: data.status,
 			role : data.role,
+			firstname : data.firstname,
+			lastname : data.lastname,
+			email : data.email,
+			firmname:data.firmname,
 			ProjectId : data.projectId,
 			AccountId : data.accountId
 		}, {transaction : transaction});
@@ -62,6 +70,10 @@ module.exports = function(data, transaction, models, actions){
 			return models.ProjectAccount.create({
 				status: data.status,
 				role : data.role,
+				firstname : data.firstname,
+				lastname : data.lastname,
+				email : data.email,
+				firmname:data.firmname,
 				ProjectId : data.projectId,
 				AccountId : data.accountId
 			}, {transaction : transaction});

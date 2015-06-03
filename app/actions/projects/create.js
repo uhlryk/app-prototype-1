@@ -6,6 +6,8 @@ var bcrypt = require('bcrypt');
  * data.firstname?
  * data.lastname?
  * data.email?
+ * data.firmname
+ *
  * data.password
  * data.name
  * data.package
@@ -20,7 +22,7 @@ module.exports = function(data, transaction, models, actions){
 	var password;
 
 	return models.Project.create({
-		name : data.name,
+		name : data.projectname,
 		ProfileId : data.profileId,
 		package : data.package
 	}, {transaction : transaction})
@@ -31,10 +33,10 @@ module.exports = function(data, transaction, models, actions){
 	.then(function(project){
 		projectModel = project;
 		return actions.projectAccounts.createProjectLeader({
-			transaction: transaction,
 			firstname : data.firstname,
 			lastname : data.lastname,
 			email : data.email,
+			firmname : data.firmname,
 			phone : data.phone,
 			password : data.password,
 			projectId : project.id,

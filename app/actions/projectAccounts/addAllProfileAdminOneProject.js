@@ -19,7 +19,7 @@ module.exports = function(data, transaction, models, actions){
 				status : 'ACTIVE'
 			},
 			include : [{//plural
-				attributes:['id'],
+				attributes:['id','firstname','lastname','firmname','email'],
 				model: models.Account,
 				required: false,
 				where : {
@@ -44,7 +44,7 @@ module.exports = function(data, transaction, models, actions){
 		if(project && project.Profile && project.Profile.Accounts){//wszystkie konta które sa PROFILE_ADMIN dla tego profilu
 			return models.sequelize.Promise.map(project.Profile.Accounts , function(account) {
 				var canCreateRole = true;
-				if(account && account.ProjectAccounts  && account.ProjectAccounts.length > 0){
+				if(account.ProjectAccounts  && account.ProjectAccounts.length > 0){
 					/**
 					 * znaczy że ten PROFILE_ADMIN ma jakieś role w danym projekcie
 					 * sprawdźmy role i jeśli jest rola PROFILE_ADMIN to canCreateRole = false
@@ -64,6 +64,10 @@ module.exports = function(data, transaction, models, actions){
 					return models.ProjectAccount.create({
 						status: 'ACTIVE',
 						role : 'PROFILE_ADMIN',
+						firstname : account.firstname,
+						lastname : account.lastname,
+						email : account.email,
+						firmname:account.firmname,
 						ProjectId : project.id,
 						AccountId : account.id
 					}, {transaction : transaction});

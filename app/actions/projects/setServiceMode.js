@@ -10,6 +10,7 @@
  * data.firstname
  * data.lastname
  * data.email
+ * data.firmname
  * data.password
  * return
  * {accountModel: accountModel, projectModel:projectModel, accountOperation: [CREATE_NEW | ACTIVE_PROPOSITION | ACTIVE]}
@@ -48,6 +49,7 @@ module.exports = function(data, transaction, models, actions){
 		{//zmieniamy PROJECT_LEADER
 			return actions.projectAccounts.createProjectLeader({
 				transaction: transaction,
+				firmname : data.firmname,
 				firstname : data.firstname,
 				lastname : data.lastname,
 				email : data.email,

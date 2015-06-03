@@ -7,6 +7,7 @@ var bcrypt = require('bcrypt');
  * data.profileId id profilu dla którego ma być ustawiony admin
  * dane dla nowego leadera
  * data.phone
+ * data.firmname
  * opcjonalne:
  * data.firstname
  * data.lastname
@@ -24,6 +25,7 @@ module.exports = function(data, transaction, models, actions){
 		lastname : data.lastname,
 		email : data.email,
 		phone : data.phone,
+		firmname: data.firmname,
 		password : data.password,
 		profileId : data.profileId,
 		status : 'ACTIVE'

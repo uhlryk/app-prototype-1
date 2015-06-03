@@ -10,13 +10,8 @@ var router = new express.Router();
 var RuleAccess = require('ruleaccess');
 
 router.post("/status", RuleAccess.isAllowed(), function(req, res){
-	req.checkBody('project_id', 'INVALID_FIELD').isId();
-	req.sanitize('project_id').toInt();
-	req.checkBody('status', 'REQUIRE_FIELD').notEmpty();
-	var errors = req.validationErrors();
-	if (errors) {
-		return res.sendValidationError({name : "ExpressValidationError", errors :errors});
-	}
+	if(!req.validate(['project_id', 'status']))return;
+
 	req.app.get("actions").projects.changeStatus({
 		projectId : req.body.project_id,
 		status : req.body.status,

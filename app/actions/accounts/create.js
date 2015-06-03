@@ -6,6 +6,7 @@
  * data.firstname
  * data.lastname
  * data.email
+ * data.firmname
  * data.password
  * data.status 'ACTIVE','PROPOSITION' czyli czy tworzymy użytkownika czy tylko go proponujemy, domyślnie baza odpali 'ACTIVE'
  * return
@@ -32,6 +33,7 @@ module.exports = function(data, transaction, models, actions){
 				firstname : data.firstname,
 				lastname : data.lastname,
 				email : data.email,
+				firmname:data.firmname,
 				phone : data.phone,
 				password : bcrypt.hashSync(data.password, 8)
 			};
