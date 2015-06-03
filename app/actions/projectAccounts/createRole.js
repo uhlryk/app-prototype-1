@@ -10,7 +10,6 @@
  * UWAGA
  * nie sprawdzamy na tym poziomie czy tworzący user ma prawo dodać rolę docelowemu userowi do takiego projektu
  * sprawdzamy tylko czy docelowy user może mieć taką rolę
- * data.transaction dodajemy transakcję
  * data.projectId id projektu dla którego ma być ustawiony leader
  * data.role 'PROFILE_ADMIN', 'PROJECT_LEADER', 'COWORKER', 'INVESTOR', 'INSPECTOR', 'DESIGNER', 'SUBCONTRACTOR'
  * data.status 'ACTIVE','PROPOSITION' czyli czy tworzymy użytkownika czy tylko go proponujemy
@@ -20,6 +19,7 @@
 module.exports = function(data, transaction, models, actions){
 	var operation;
 	if(data.status === 'PROPOSITION'){//może być dowolna licza propozycji ról w projekcie więc nie sprawdzamy istniejących
+		//chociaż może warto je obciąć
 		return models.ProjectAccount.create({
 			status: data.status,
 			role : data.role,
@@ -27,7 +27,7 @@ module.exports = function(data, transaction, models, actions){
 			AccountId : data.accountId
 		}, {transaction : transaction});
 	} else {// tworzenie aktywnych ról wymaga sprawdzenia czy spełnione są wszystkie warunki
-		return models.ProjectAccount.findAll({//wszystkie role w projekcie wyciągamy
+		return models.ProjectAccount.findAll({//wszystkie aktywne role w projekcie wyciągamy
 			where : {
 				status : "ACTIVE",
 				ProjectId : data.projectId,

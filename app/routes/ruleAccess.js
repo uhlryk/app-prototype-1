@@ -105,15 +105,21 @@ module.exports = function(ruleAccess) {
 	 */
 	ruleAccess.addRule("POST/projects/paymant", superAdminAllowed());
 	/**
-	 * tylko leader tego projektu
+	 * reguły dodawania użytkowników, ACTIVE, PROPOSITION i ACTIVATE PROPOSITION
 	 */
 	ruleAccess.addRule("POST/users/coworker/create", userProjectRoleAllowed('PROJECT_LEADER'));
-	/**
-	 * tylko leader tego projektu
-	 */
 	ruleAccess.addRule("POST/users/coworker/accept", userProjectRoleAllowed('PROJECT_LEADER'));
-	/**
-	 * tylko leader tego projektu
-	 */
 	ruleAccess.addRule("POST/users/coworker/proposition", RuleAccess.rule.anyOnRuleList([userProjectRoleAllowed('PROFILE_ADMIN'), userProjectRoleAllowed('COWORKER')]));
+	ruleAccess.addRule("POST/users/investor/create", userProjectRoleAllowed('PROJECT_LEADER'));
+	ruleAccess.addRule("POST/users/investor/accept", userProjectRoleAllowed('PROJECT_LEADER'));
+	ruleAccess.addRule("POST/users/investor/proposition", RuleAccess.rule.anyOnRuleList([userProjectRoleAllowed('PROFILE_ADMIN'), userProjectRoleAllowed('COWORKER')]));
+	ruleAccess.addRule("POST/users/designer/create", userProjectRoleAllowed('PROJECT_LEADER'));
+	ruleAccess.addRule("POST/users/designer/accept", userProjectRoleAllowed('PROJECT_LEADER'));
+	ruleAccess.addRule("POST/users/designer/proposition", RuleAccess.rule.anyOnRuleList([userProjectRoleAllowed('PROFILE_ADMIN'), userProjectRoleAllowed('COWORKER')]));
+	ruleAccess.addRule("POST/users/inspector/create", userProjectRoleAllowed('PROJECT_LEADER'));
+	ruleAccess.addRule("POST/users/inspector/accept", userProjectRoleAllowed('PROJECT_LEADER'));
+	ruleAccess.addRule("POST/users/inspector/proposition", RuleAccess.rule.anyOnRuleList([userProjectRoleAllowed('PROFILE_ADMIN'), userProjectRoleAllowed('COWORKER')]));
+	ruleAccess.addRule("POST/users/subcontractor/create", userProjectRoleAllowed('PROJECT_LEADER'));
+	ruleAccess.addRule("POST/users/subcontractor/accept", userProjectRoleAllowed('PROJECT_LEADER'));
+	ruleAccess.addRule("POST/users/subcontractor/proposition", RuleAccess.rule.anyOnRuleList([userProjectRoleAllowed('PROFILE_ADMIN'), userProjectRoleAllowed('COWORKER')]));
 };

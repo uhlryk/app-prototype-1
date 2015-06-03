@@ -49,7 +49,6 @@ router.post("/profile_admin", RuleAccess.isAllowed(), function(req, res, next){
 		}
 	})
 	.catch(function(err){
-		console.log(err);
 		return res.sendValidationError(err);
 	});
 });

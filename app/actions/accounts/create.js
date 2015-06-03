@@ -44,7 +44,12 @@ module.exports = function(data, transaction, models, actions){
 			/**
 			 * oznacza że nie ma dla danegu telefonu konta, musimy więc utworzyć nowe konto
 			 */
-			operation = 'CREATE_NEW';
+			if(data.status){
+				operation = 'PROPOSITION';
+
+			} else{
+				operation = 'CREATE_NEW';
+			}
 			return models.Account.create(modelData, {transaction : transaction})
 			.then(function(account){
 				accountModel  = account;

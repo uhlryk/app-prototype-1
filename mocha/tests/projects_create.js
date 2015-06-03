@@ -1,4 +1,3 @@
-//OK
 var serverBuilder = require("../../app/server.js");
 var config = require("../../config/local_test.js");
 var chai = require("chai");

@@ -9,13 +9,17 @@
  * lastname
  * email
  * phone
+ * return
+ * {
+ * 	login - login(phone) leadera
+ * 	id - id projektu
+ * }
  */
 
 var express = require('express');
 var router = new express.Router();
 var RuleAccess = require('ruleaccess');
 var generatePassword = require('password-generator');
-var phone = require('phone');
 
 router.post("/", RuleAccess.isAllowed(), function(req, res){
 	req.checkBody('profile_id', 'INVALID_FIELD').isId();

@@ -8,8 +8,8 @@ module.exports = function(config, callback) {
 	var favicon = require('serve-favicon');
 	var http = require("http");
 	var debug = require('debug')('server');
-	var validationErrorParser = require("./libs/validationErrorParser");
-	var smsManager = require("./libs/smsManager");
+	var validationErrorParser = require("./helpers/validationErrorParser");
+	var smsManager = require("./helpers/smsManager");
 	var expressValidator = require('express-validator');
 	var app = express();
 	app.use(favicon(__dirname + '/../public/favicon.ico'));
@@ -19,8 +19,8 @@ module.exports = function(config, callback) {
 	app.use(bodyParser.json());
 	app.use(bodyParser.urlencoded({extended: true}));
 	app.use(expressValidator({
-		customValidators: require("./libs/validatorList.js").validators,
-		customSanitizers : require("./libs/validatorList.js").sanitizers,
+		customValidators: require("./helpers/validatorList.js").validators,
+		customSanitizers : require("./helpers/validatorList.js").sanitizers,
 	}));
 	app.use(function (req, res, next) {
 		res.header('Access-Control-Allow-Origin', "*");
