@@ -9,7 +9,7 @@ var express = require('express');
 var router = new express.Router();
 var RuleAccess = require('ruleaccess');
 
-router.post("/profiles", RuleAccess.isAllowed(), function(req, res){
+router.post("/profiles/", RuleAccess.isAllowed(), function(req, res){
 	req.app.get("actions").profiles.create({
 		firmname : req.body.firmname,
 		nip : req.body.nip,

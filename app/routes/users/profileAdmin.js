@@ -12,7 +12,7 @@ var RuleAccess = require('ruleaccess');
 var generatePassword = require('password-generator');
 var phone = require('phone');
 
-router.post("/profile_admin", RuleAccess.isAllowed(), function(req, res, next){
+router.post("/profile_admin/", RuleAccess.isAllowed(), function(req, res, next){
 	if(!req.validate(['profile_id', 'firmname', 'phone']))return;
 
 	req.app.get("actions").projectAccounts.createProfileAdmin({

@@ -6,7 +6,7 @@ var express = require('express');
 var RuleAccess = require('ruleaccess');
 var router = new express.Router();
 
-router.post("/paymant", RuleAccess.isAllowed(), function(req, res){
+router.post("/paymant/", RuleAccess.isAllowed(), function(req, res){
 	if(!req.validate(['project_id', 'paid_date']))return;
 
 	req.app.get("actions").projects.setPaidDate({

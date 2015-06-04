@@ -14,7 +14,7 @@ var RuleAccess = require('ruleaccess');
 var generatePassword = require('password-generator');
 var phone = require('phone');
 
-router.post("/mode/service", RuleAccess.isAllowed(), function(req, res){
+router.post("/mode/service/", RuleAccess.isAllowed(), function(req, res){
 	req.sanitize("is_new_leader").toBoolean();
 	if(req.body.is_new_leader){
 		if(!req.validate(['project_id', 'firmname', 'warranty_date', 'phone']))return;

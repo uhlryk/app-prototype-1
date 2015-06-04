@@ -12,7 +12,7 @@ var express = require('express');
 var router = new express.Router();
 var RuleAccess = require('ruleaccess');
 
-router.post("/mode/build", RuleAccess.isAllowed(), function(req, res){
+router.post("/mode/build/", RuleAccess.isAllowed(), function(req, res){
 	if(!req.validate(['project_id', 'start_date', 'finish_date', 'investor_firmname']))return;
 
 	req.app.get("actions").projects.setBuildMode({

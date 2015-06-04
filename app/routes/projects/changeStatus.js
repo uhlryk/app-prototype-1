@@ -9,7 +9,7 @@ var express = require('express');
 var router = new express.Router();
 var RuleAccess = require('ruleaccess');
 
-router.post("/status", RuleAccess.isAllowed(), function(req, res){
+router.post("/status/", RuleAccess.isAllowed(), function(req, res){
 	if(!req.validate(['project_id', 'status']))return;
 
 	req.app.get("actions").projects.changeStatus({

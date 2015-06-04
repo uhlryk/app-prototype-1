@@ -10,7 +10,7 @@ var uuid = require('node-uuid');
 var bcrypt = require('bcrypt');
 var router = new express.Router();
 
-router.get("/tokens/:token", function(req, res, next){
+router.get("/tokens/:token/", function(req, res, next){
 	var token = req.params.token;
 	req.app.get("actions").tokens.find({
 		token : token
