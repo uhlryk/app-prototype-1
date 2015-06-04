@@ -48,15 +48,16 @@ router.post("/", RuleAccess.isAllowed(), function(req, res){
 				if(err){
 					//todo: zwrócić jakis błąd gdy sms nie wyjdzie
 				}
-				return res.sendData(200, {login: data.accountModel.phone, id: data.projectModel.id});
+				return res.sendData(200, {accountId : data.accountModel.id, login: data.accountModel.phone, projectId: data.projectModel.id});
 			});
 		} else {
-			return res.sendData(200, {login: data.accountModel.phone, id: data.projectModel.id});
+			return res.sendData(200, {accountId : data.accountModel.id, login: data.accountModel.phone, projectId: data.projectModel.id});
 		}
 	})
 	.catch(function(err){
 		return res.sendValidationError(err);
 	});
+
 });
 
 module.exports = router;

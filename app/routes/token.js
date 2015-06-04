@@ -52,7 +52,7 @@ router.post("/tokens/", function(req, res, next){
 	} else {//logowanie pozostałych userów
 		req.app.get("actions").accounts.find({
 			phone : login
-		})
+		}, false)
 		.then(function(data){
 			if(data === null){
 				//TODO: zmienić na sendValidationError i pomyśleć nad zmianą kodu

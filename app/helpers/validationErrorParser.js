@@ -5,7 +5,7 @@
  */
 module.exports = function(errorObject) {
 	var validationMessage = {};
-	if(errorObject.name === "SequelizeValidationError"){
+	if(errorObject.name === "SequelizeValidationError" || errorObject.name === "SequelizeUniqueConstraintError"){
 		validationMessage.message = "VALIDATION_ERROR";
 		if(errorObject.errors !== null && errorObject.errors.length > 0){
 			validationMessage.errors = [];
@@ -18,6 +18,10 @@ module.exports = function(errorObject) {
 					break;
 					case "Validation error":
 						newError.type = "FIELD_VALIDATION_FAILED";
+						newError.field = error.path;
+					break;
+					case "unique violation":
+						newError.type = "DUPLICATE_UNIQUE";
 						newError.field = error.path;
 					break;
 					default:
@@ -33,6 +37,10 @@ module.exports = function(errorObject) {
 	} else if(errorObject.name === "SequelizeForeignKeyConstraintError"){
 		validationMessage.message = "PROCESS_ERROR";
 		validationMessage.type = "FOREIGN_KEY_CONSTRAINT";
+		return validationMessage;
+	} else if(errorObject.name === "SequelizeDatabaseError" && errorObject.message === "ER_LOCK_DEADLOCK: Deadlock found when trying to get lock; try restarting transaction"){
+		validationMessage.message = "PROCESS_ERROR";
+		validationMessage.type = "LOCK_DEADLOCK";
 		return validationMessage;
 	} else if(errorObject.name === "ExpressValidationError"){
 		validationMessage.message = "VALIDATION_ERROR";

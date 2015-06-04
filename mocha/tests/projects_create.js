@@ -34,7 +34,7 @@ describe("Create project test: ", function(){
 				superUserToken = token;
 				helper.createProfile(superUserToken, "Moja firma 112", function(id){
 					profileId = id;
-					helper.createProfileAdmin(superUserToken, profileId, "+48801633386", function(login, password){
+					helper.createProfileAdmin(superUserToken, profileId, "+48801633386", function(id, login){
 						profileAdminLogin = login;
 						var smsData = server.getSmsDebug(login);
 						profileAdminPassword = smsData.password;
@@ -62,7 +62,8 @@ describe("Create project test: ", function(){
 				expect(res.body.login).to.be.a("string");
 				var smsData = server.getSmsDebug(res.body.login);
 				expect(smsData.password).to.be.a("string");
-				expect(res.body.id).to.be.above(0);
+				expect(res.body.projectId).to.be.above(0);
+				expect(res.body.accountId).to.be.above(0);
 				done();
 			});
 		});
@@ -177,7 +178,8 @@ describe("Create project test: ", function(){
 				expect(res.body.login).to.be.a("string");
 				var smsData = server.getSmsDebug(res.body.login);
 				expect(smsData.password).to.be.a("string");
-				expect(res.body.id).to.be.above(0);
+				expect(res.body.projectId).to.be.above(0);
+				expect(res.body.accountId).to.be.above(0);
 				done();
 			});
 		});

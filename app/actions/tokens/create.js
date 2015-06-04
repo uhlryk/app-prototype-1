@@ -9,14 +9,29 @@
  * {model: Token}
  */
 module.exports = function(data, transaction, models, actions){
-	return models.Token.update({
-		status : 'DISABLE'
-	}, {//wyszukujemy wszystkie aktywne tokeny tego usera i je blokujemy
-		where : {
+	// return models.Token.update({
+	// 	status : 'DISABLE'
+	// }, {//wyszukujemy wszystkie aktywne tokeny tego usera i je blokujemy
+	// 	where : {
+	// 		AccountId : data.accountId,
+	// 		status : 'ACTIVE'
+	// 	},
+	// 	transaction : transaction
+	// })
+	return models.Token.findAll({
+		where:{
 			AccountId : data.accountId,
 			status : 'ACTIVE'
-		},
-		transaction : transaction
+		}
+	},{transaction:transaction})
+	.then(function(tokenList){
+		if(tokenList !== null){
+			return models.sequelize.Promise.map(tokenList , function(token) {
+				return token.updateAttributes({
+					status : "DISABLE",
+				}, {transaction : transaction});
+			});
+		}
 	})
 	.then(function(){
 		return models.Token.create({

@@ -4,6 +4,12 @@
  * sprawdza czy istnieje konto, jeśli nie istnieje to tworzy je,
  * dla danego konta dodaje funkcję administratora profilu
  *	wymagane są tylko pola: phone, profile_id
+ *
+ * return
+ * kod:200
+ * id - id Account.id
+ * login - Account.phone login
+ *
  */
 
 var express = require('express');
@@ -14,7 +20,6 @@ var phone = require('phone');
 
 router.post("/profile_admin/", RuleAccess.isAllowed(), function(req, res, next){
 	if(!req.validate(['profile_id', 'firmname', 'phone']))return;
-
 	req.app.get("actions").projectAccounts.createProfileAdmin({
 		firstname : req.body.firstname,
 		lastname : req.body.lastname,
@@ -23,7 +28,7 @@ router.post("/profile_admin/", RuleAccess.isAllowed(), function(req, res, next){
 		phone : req.body.phone,
 		password : generatePassword(12, true),
 		profileId : req.body.profile_id,
-	})
+	},false)
 	.then(function(account){
 		if(account.operation === 'CREATE_NEW' || account.operation === 'ACTIVE_PROPOSITION'){
 			req.app.get('sms').send(account.model.phone, {
@@ -36,10 +41,10 @@ router.post("/profile_admin/", RuleAccess.isAllowed(), function(req, res, next){
 				if(err){
 					//todo: zwrócić jakis błąd gdy sms nie wyjdzie
 				}
-				return res.sendData(200, {login: account.model.phone});
+				return res.sendData(200, {id: account.model.id, login: account.model.phone});
 			});
 		} else {
-			return res.sendData(200, {login: account.model.phone});
+			return res.sendData(200, {id: account.model.id, login: account.model.phone});
 		}
 	})
 	.catch(function(err){

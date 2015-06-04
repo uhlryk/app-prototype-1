@@ -26,7 +26,7 @@ describe("Project change status and set paid date test: ", function(){
 				superUserToken = token;
 				helper.createProfile(superUserToken, "Moja firma 112", function(id){
 					profileId = id;
-					helper.createProfileAdmin(superUserToken, profileId, "+48801633386", function(login, password){
+					helper.createProfileAdmin(superUserToken, profileId, "+48801633386", function(id, login){
 						profileAdminLogin = login;
 						var smsData = server.getSmsDebug(login);
 						profileAdminPassword = smsData.password;

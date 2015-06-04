@@ -22,7 +22,7 @@ describe("Create and accept normal user test: ", function(){
 				superUserToken = token;
 				helper.createProfile(superUserToken, "Moja firma 112", function(id){
 					profileId = id;
-					helper.createProfileAdmin(superUserToken, profileId, "+48801633386", function(login, password){
+					helper.createProfileAdmin(superUserToken, profileId, "+48801633386", function(id, login){
 						profileAdminLogin = login;
 						var smsData = server.getSmsDebug(login);
 						helper.loginUser(profileAdminLogin, smsData.password, function(token){

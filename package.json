@@ -20,6 +20,7 @@
     "twilio": "^2.2.0"
   },
   "devDependencies": {
+    "bluebird": "^2.9.27",
     "chai": "^2.3.0",
     "chai-things": "^0.2.0",
     "gulp": "^3.8.11",

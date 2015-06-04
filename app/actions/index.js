@@ -40,9 +40,7 @@ module.exports = function(config){
 			 */
 			var _action = require(path.join(actionPath, file));
 			actions[controller][fileName] = function(data, transaction){
-				// return _action(c, cb, config.models, actions);
-				if(transaction){
-					// return model(data, transaction, models, actions);
+				if(transaction || transaction === false){//jeśli mamy transakcję lub jej nie chcemy - ustawiliśmy false to nie tworzymy nowej transakcji
 					return _action(data, transaction, config.models, actions);
 				} else {
 					return config.models.sequelize.transaction().then(function (transaction) {

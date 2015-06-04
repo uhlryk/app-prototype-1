@@ -54,34 +54,43 @@ module.exports = function(server, url){
 		 * @param  {[type]}   profileId  [description]
 		 * @param  {[type]}   phone      [description]
 		 * @param  {Function} cb         [description]
-		 * @return {[type]}              [description]
+		 * return cb
+		 * id Accoun.id
+		 * login Account.phone
 		 */
 		createProfileAdmin : function(adminToken, profileId, phone, cb){
 			request.post(url + "/users/profile_admin")
 			.set('access-token', adminToken)
 			.send({profile_id : profileId})
 			.send({phone : phone})
-			.send({firmname : "firmaA"})
+			.send({firmname : "firmaA" + profileId})
 			.end(function(err, res){
 				expect(res.status).to.be.equal(200);
 				expect(res.body.login).to.be.a("string");
-				cb(res.body.login);
+				cb(res.body.id, res.body.login);
 			});
 		},
+		/**
+		 *
+		 * return cb
+		 * login Account.phone login leadera
+		 * Project.id id projektu
+		 * AccountId id leadera
+		 */
 		createProject : function(profileAdminToken, profileId, packageName, projectName, phone, cb){
 			request.post(url + "/projects")
 			.set('access-token', profileAdminToken)
 			.send({name : projectName})
 			.send({package : packageName})
 			.send({profile_id : profileId})
-			.send({phone : "+48791111111"})
+			.send({phone : phone})
 			.send({firmname : "firmaA"})
 			.end(function(err, res){
-				// console.log(res.body);
 				expect(res.status).to.be.equal(200);
 				expect(res.body.login).to.be.a("string");
-				expect(res.body.id).to.be.above(0);
-				cb(res.body.login, res.body.id);
+				expect(res.body.projectId).to.be.above(0);
+				expect(res.body.accountId).to.be.above(0);
+				cb(res.body.login, res.body.projectId, res.body.accountId);
 			});
 		},
 		setProjectBuildMode : function(leaderToken, projectId, cb){
