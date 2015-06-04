@@ -60,7 +60,7 @@ function profileAdminAllowed(){
  * jest to sprawdzenie w route callback to req.body.project_id
  * user role określamy w opcjach
  */
-function userProjectRoleAllowed(role){
+function projectRoleAllowed(role){
 	return function(userData, params){
 		var projectId = params.body.project_id;
 		if(userData && userData.Account && userData.Account.ProjectAccounts && userData.Account.ProjectAccounts.some){
@@ -74,7 +74,25 @@ function userProjectRoleAllowed(role){
 		return false;
 	};
 }
-
+/**
+ * uprawnienie jest wtedy gdy w danym projekcie autor ma rolę
+ * która ma przypisaną tą samą firmę jaka jest wysyłana w rządaniu
+ */
+function roleFirmnameAllowed(role){
+	return function(userData, params){
+		var projectId = params.body.project_id;
+		var firmname = params.body.firmname;
+		if(userData && userData.Account && userData.Account.ProjectAccounts && userData.Account.ProjectAccounts.some){
+			return userData.Account.ProjectAccounts.some(function(roleData){
+				if(roleData.Project && roleData.Project.status === 'ACTIVE' && roleData.role === role && projectId > 0 && roleData.ProjectId === projectId && roleData.firmname === firmname){
+					return true;
+				}
+				return false;
+			});
+		}
+		return false;
+	};
+}
 module.exports = function(ruleAccess) {
 	/**
 	 * tylko super admin ma dostęp do zasobu
@@ -91,11 +109,11 @@ module.exports = function(ruleAccess) {
 	/**
 	 * tylko leader tego projektu
 	 */
-	ruleAccess.addRule("POST/projects/mode/build/", userProjectRoleAllowed('PROJECT_LEADER'));
+	ruleAccess.addRule("POST/projects/mode/build/", projectRoleAllowed('PROJECT_LEADER'));
 	/**
 	 * tylko leader tego projektu
 	 */
-	ruleAccess.addRule("POST/projects/mode/service/", userProjectRoleAllowed('PROJECT_LEADER'));
+	ruleAccess.addRule("POST/projects/mode/service/", projectRoleAllowed('PROJECT_LEADER'));
 	// ruleAccess.addRule("POST/projects/mode/service", RuleAccess.rule.alwaysAllow());
 	/**
 	 * tylko super admin ma dostęp do zasobu
@@ -108,19 +126,54 @@ module.exports = function(ruleAccess) {
 	/**
 	 * reguły dodawania użytkowników, ACTIVE, PROPOSITION i ACTIVATE PROPOSITION
 	 */
-	ruleAccess.addRule("POST/users/coworker/create/", userProjectRoleAllowed('PROJECT_LEADER'));
-	ruleAccess.addRule("POST/users/coworker/accept/", userProjectRoleAllowed('PROJECT_LEADER'));
-	ruleAccess.addRule("POST/users/coworker/proposition/", RuleAccess.rule.anyOnRuleList([userProjectRoleAllowed('PROFILE_ADMIN'), userProjectRoleAllowed('COWORKER')]));
-	ruleAccess.addRule("POST/users/investor/create/", userProjectRoleAllowed('PROJECT_LEADER'));
-	ruleAccess.addRule("POST/users/investor/accept/", userProjectRoleAllowed('PROJECT_LEADER'));
-	ruleAccess.addRule("POST/users/investor/proposition/", RuleAccess.rule.anyOnRuleList([userProjectRoleAllowed('PROFILE_ADMIN'), userProjectRoleAllowed('COWORKER')]));
-	ruleAccess.addRule("POST/users/designer/create/", userProjectRoleAllowed('PROJECT_LEADER'));
-	ruleAccess.addRule("POST/users/designer/accept/", userProjectRoleAllowed('PROJECT_LEADER'));
-	ruleAccess.addRule("POST/users/designer/proposition/", RuleAccess.rule.anyOnRuleList([userProjectRoleAllowed('PROFILE_ADMIN'), userProjectRoleAllowed('COWORKER')]));
-	ruleAccess.addRule("POST/users/inspector/create/", userProjectRoleAllowed('PROJECT_LEADER'));
-	ruleAccess.addRule("POST/users/inspector/accept/", userProjectRoleAllowed('PROJECT_LEADER'));
-	ruleAccess.addRule("POST/users/inspector/proposition/", RuleAccess.rule.anyOnRuleList([userProjectRoleAllowed('PROFILE_ADMIN'), userProjectRoleAllowed('COWORKER')]));
-	ruleAccess.addRule("POST/users/subcontractor/create/", userProjectRoleAllowed('PROJECT_LEADER'));
-	ruleAccess.addRule("POST/users/subcontractor/accept/", userProjectRoleAllowed('PROJECT_LEADER'));
-	ruleAccess.addRule("POST/users/subcontractor/proposition/", RuleAccess.rule.anyOnRuleList([userProjectRoleAllowed('PROFILE_ADMIN'), userProjectRoleAllowed('COWORKER')]));
+	ruleAccess.addRule("POST/users/coworker/create/", projectRoleAllowed('PROJECT_LEADER'));
+	ruleAccess.addRule("POST/users/coworker/accept/", projectRoleAllowed('PROJECT_LEADER'));
+	ruleAccess.addRule("POST/users/coworker/proposition/", RuleAccess.rule.anyOnRuleList([
+		projectRoleAllowed('PROFILE_ADMIN'),
+		projectRoleAllowed('COWORKER')
+	]));
+
+	ruleAccess.addRule("POST/users/investor/create/", projectRoleAllowed('PROJECT_LEADER'));
+	ruleAccess.addRule("POST/users/investor/accept/", projectRoleAllowed('PROJECT_LEADER'));
+	ruleAccess.addRule("POST/users/investor/proposition/", RuleAccess.rule.anyOnRuleList([
+		projectRoleAllowed('PROFILE_ADMIN'),
+		projectRoleAllowed('COWORKER'),
+		projectRoleAllowed('INVESTOR'),
+	]));
+
+	ruleAccess.addRule("POST/users/designer/create/", projectRoleAllowed('PROJECT_LEADER'));
+	ruleAccess.addRule("POST/users/designer/accept/", projectRoleAllowed('PROJECT_LEADER'));
+	ruleAccess.addRule("POST/users/designer/proposition/", RuleAccess.rule.anyOnRuleList([
+		projectRoleAllowed('PROFILE_ADMIN'),
+		projectRoleAllowed('COWORKER'),
+		projectRoleAllowed('INVESTOR'),
+		projectRoleAllowed('INSPECTOR'),
+		projectRoleAllowed('DESIGNER'),
+	]));
+
+	ruleAccess.addRule("POST/users/inspector/create/", projectRoleAllowed('PROJECT_LEADER'));
+	ruleAccess.addRule("POST/users/inspector/accept/", projectRoleAllowed('PROJECT_LEADER'));
+	ruleAccess.addRule("POST/users/inspector/proposition/", RuleAccess.rule.anyOnRuleList([
+		projectRoleAllowed('PROFILE_ADMIN'),
+		projectRoleAllowed('COWORKER'),
+		projectRoleAllowed('INVESTOR'),
+		projectRoleAllowed('INSPECTOR'),
+	]));
+
+	ruleAccess.addRule("POST/users/subcontractor/create/", RuleAccess.rule.anyOnRuleList([
+		projectRoleAllowed('PROJECT_LEADER'),
+		projectRoleAllowed('COWORKER'),
+		projectRoleAllowed('PROFILE_ADMIN')
+	]));
+	ruleAccess.addRule("POST/users/subcontractor/accept/", RuleAccess.rule.anyOnRuleList([
+		projectRoleAllowed('PROJECT_LEADER'),
+		projectRoleAllowed('COWORKER'),
+		projectRoleAllowed('PROFILE_ADMIN')
+	]));
+	ruleAccess.addRule("POST/users/subcontractor/proposition/", RuleAccess.rule.anyOnRuleList([
+		projectRoleAllowed('PROFILE_ADMIN'),
+		projectRoleAllowed('COWORKER'),
+		projectRoleAllowed('INVESTOR'),
+		roleFirmnameAllowed('SUBCONTRACTOR'),
+	]));
 };

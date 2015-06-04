@@ -78,20 +78,22 @@ roles.forEach(function(role){
 					done();
 				});
 			});
-			it("should not create " + role + " when owner is't leader", function(done){
-				request.post(url + "/users/" + role + "/create")
-				.set('access-token', profileAdminToken)
-				.send({"project_id": projectId})
-				.send({firstname : "Adam"})
-				.send({lastname : "Kowalski"})
-				.send({phone : "+48701611386"})
-				.send({firmname : "FirmaA"})
-				.end(function(err, res){
-					expect(res.status).to.be.equal(401);
-					expect(res.body.message).to.be.equal("NOT_AUTHORIZED");
-					done();
+			if(role !== 'subcontractor'){//akceptuje również profileAdmina- zgodnie z oczekiwaniami
+				it("should not create " + role + " when owner is't leader", function(done){
+					request.post(url + "/users/" + role + "/create")
+					.set('access-token', profileAdminToken)
+					.send({"project_id": projectId})
+					.send({firstname : "Adam"})
+					.send({lastname : "Kowalski"})
+					.send({phone : "+48701611386"})
+					.send({firmname : "FirmaA"})
+					.end(function(err, res){
+						expect(res.status).to.be.equal(401);
+						expect(res.body.message).to.be.equal("NOT_AUTHORIZED");
+						done();
+					});
 				});
-			});
+			}
 			it("should not create " + role + " when phone is't send", function(done){
 				request.post(url + "/users/" + role + "/create")
 				.set('access-token', leaderToken)
@@ -242,17 +244,19 @@ roles.forEach(function(role){
 						done();
 					});
 				});
-				it("should not accept " + role + " when owner is't leader", function(done){
-					request.post(url + "/users/" + role + "/accept")
-					.set('access-token', profileAdminToken)
-					.send({"role_id": coworkerRoleId})
-					.send({"project_id": projectId})
-					.end(function(err, res){
-						expect(res.status).to.be.equal(401);
-						expect(res.body.message).to.be.equal("NOT_AUTHORIZED");
-						done();
+				if(role !== 'subcontractor'){//akceptuje również profileAdmina- zgodnie z oczekiwaniami
+					it("should not accept " + role + " when owner is't leader", function(done){
+						request.post(url + "/users/" + role + "/accept")
+						.set('access-token', profileAdminToken)
+						.send({"role_id": coworkerRoleId})
+						.send({"project_id": projectId})
+						.end(function(err, res){
+							expect(res.status).to.be.equal(401);
+							expect(res.body.message).to.be.equal("NOT_AUTHORIZED");
+							done();
+						});
 					});
-				});
+				}
 				it("should not accept " + role + " when coworkerId is't send", function(done){
 					request.post(url + "/users/" + role + "/accept")
 					.set('access-token', leaderToken)
