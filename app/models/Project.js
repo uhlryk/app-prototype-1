@@ -50,6 +50,7 @@ module.exports = function(sequelize, DataTypes) {
 		classMethods: {
 			associate: function (models) {
 				Project.hasMany(models.ProjectAccount);
+				Project.hasMany(models.Category);
 				Project.belongsTo(models.Profile);
 				//Project.hasMany(models.Account, {as: 'child', foreignKey: 'parent_id',  through: 'company_relation'});
 			}
