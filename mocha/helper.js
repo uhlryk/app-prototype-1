@@ -121,6 +121,20 @@ module.exports = function(server, url){
 				cb(res.body.login, res.body.projectId, res.body.accountId);
 			});
 		},
+		createUser : function(leaderToken, projectId, role, phone, firmname, cb){
+			request.post(url + "/users/" + role + "/create")
+			.set('access-token', leaderToken)
+			.send({"project_id": projectId})
+			.send({phone : phone})
+			.send({firmname : firmname})
+			.end(function(err, res){
+				expect(res.status).to.be.equal(200);
+				expect(res.body.accountId).to.be.above(0);
+				expect(res.body.roleId).to.be.above(0);
+				expect(res.body.login).to.be.a("string");
+				cb(res.body.login, res.body.accountId, res.body.roleId);
+			});
+		},
 		/**
 		 * Logowanie normalnego usera (różny od superadmin)
 		 * @param  {[string}   login    [description]

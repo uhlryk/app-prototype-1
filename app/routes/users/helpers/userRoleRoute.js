@@ -26,10 +26,10 @@ module.exports = {
 					if(err){
 						//todo: zwrócić jakis błąd gdy sms nie wyjdzie
 					}
-					return res.sendData(200, {login: data.accountModel.phone, id: data.roleModel.id});
+					return res.sendData(200, {login: data.accountModel.phone, roleId: data.roleModel.id, accountId : data.accountModel.id});
 				});
 			} else {
-				return res.sendData(200, {login: data.accountModel.phone, id: data.roleModel.id});
+				return res.sendData(200, {login: data.accountModel.phone, roleId: data.roleModel.id, accountId : data.accountModel.id});
 			}
 		})
 		.catch(function(err){
@@ -51,7 +51,7 @@ module.exports = {
 			status : 'PROPOSITION'
 		})
 		.then(function(data){
-			return res.sendData(200, {login: data.accountModel.phone, id: data.roleModel.id});
+			return res.sendData(200, {login: data.accountModel.phone, roleId: data.roleModel.id, accountId : data.accountModel.id});
 		})
 		.catch(function(err){
 			return res.sendValidationError(err);

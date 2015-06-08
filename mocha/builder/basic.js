@@ -21,6 +21,12 @@ describe("Create project test: ", function(){
 				initProject: 3,
 				buildProject: 3,
 				serviceProject: 3,
+				investor : 2,
+				coworker :2,
+				inspector : 2,
+				designer : 2,
+				subcontractor_1: 2,
+				subcontractor_2 : 2
 			}, function(){
 				done();
 			});

@@ -10,6 +10,12 @@ module.exports = function(server, url){
 		var initProjectNumber = data.initProject;//liczba projektów w trybie INIT
 		var buildProjectNumber = data.buildProject;//liczba projektów w trybie INIT
 		var serviceProjectNumber = data.serviceProject;//liczba projektów w trybie INIT
+		var investorNumber = data.investor;//liczba inwestorów na projekt
+		var coworkerNumber = data.coworker;//liczba coworkers na projekt
+		var inspectorNumber = data.inspector;//liczba inspectors na projekt
+		var designerNumber = data.designer;//liczba designers na projekt
+		var subcontractor1Number = data.subcontractor_1;//liczba subcontractor firmy A  na projekt
+		var subcontractor2Number = data.subcontractor_2;//liczba subcontractor firmy B  na projekt
 
 		result = {};
 		result.profiles = {};
@@ -18,7 +24,11 @@ module.exports = function(server, url){
 		result.roles = {
 			PROFILE_ADMIN : [],
 			PROJECT_LEADER : [],
-			COWORKER : []
+			COWORKER : [],
+			INVESTOR:[],
+			INSPECTOR:[],
+			DESIGNER: [],
+			SUBCONTRACTOR:[]
 		};
 		result.modes = {
 			INIT : [],
@@ -60,10 +70,16 @@ module.exports = function(server, url){
 					var countProjects = initProjectNumber;
 					return Promise.map(new Array(buildProjectNumber) , function() {
 						countProjects ++;
+						var projectData;
 						return createProjects(countProjects, profileData)
 						.then(function(project){
+							projectData = project;
 							return setProjectBuildMode(project);
-						});
+						})
+						.then(function(){
+							return loopUsers(investorNumber, coworkerNumber, inspectorNumber, designerNumber, subcontractor1Number, subcontractor2Number, projectData);
+						})
+						;
 					});
 				})
 				.then(function(){//tworzymy projekty BUILD dla danego profilu
@@ -78,13 +94,17 @@ module.exports = function(server, url){
 						})
 						.then(function(){
 							return setProjectServiceMode(projectData);
-						});
+						})
+						.then(function(){
+							return loopUsers(investorNumber, coworkerNumber, inspectorNumber, designerNumber, subcontractor1Number, subcontractor2Number, projectData);
+						})
+						;
 					});
 				});
 			});
 		})
 		.then(function(){
-			console.log(result.modes);
+			console.log(result.roles);
 			cb();
 		})
 		;
@@ -154,6 +174,42 @@ module.exports = function(server, url){
 					result.roles.PROJECT_LEADER.push(accountId);
 					result.modes.SERVICE.push(project.id);
 					deleteArrayElement(result.modes.BUILD, project.id);
+					resolve();
+				});
+			});
+		});
+	}
+	function loopUsers(investorNumber, coworkerNumber, inspectorNumber, designerNumber, subcontractor1Number, subcontractor2Number, project){
+		var count = 0;
+		var subcount =0 ;
+		return Promise.map(new Array(6) , function() {
+		var role = "COWORKER";
+		var firmname = "firmB";
+		var num;
+			count++;
+			switch(count){
+				case 1: role="INVESTOR";firmname="firmInvestor";num=investorNumber;break;
+				case 2: role="COWORKER";firmname="firmCoworker";num=coworkerNumber;break;
+				case 3: role="INSPECTOR";firmname="firmInspector";num=inspectorNumber;break;
+				case 4: role="DESIGNER";firmname="firmDesigner";num=designerNumber;break;
+				case 5: role="SUBCONTRACTOR";firmname="firmSubA";num=subcontractor1Number;break;
+				case 6: role="SUBCONTRACTOR";firmname="firmSubB";num=subcontractor2Number;break;
+			}
+			return Promise.map(new Array(num) , function() {
+				subcount++;
+				return createUser(subcount, role, firmname, project);
+			});
+		});
+	}
+	function createUser(num, role, firmname, project){
+		return new Promise(function(resolve) {
+			var leader = result.users[project.leaderId];
+			helper.createUser(leader.token, project.id, role, "+48" + (804000000+project.id*1000+num), firmname, function(login, accountId, roleId){
+				var password = server.getSmsDebug(login).password;
+				helper.loginUser(login, password, function(token){
+					result.users[accountId]= {id:accountId, login:login, password:password, token : token, role :role, projectId:project.id};
+					project.users.push(accountId);
+					result.roles[role].push(accountId);
 					resolve();
 				});
 			});

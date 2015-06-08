@@ -17,6 +17,9 @@ roles.forEach(function(role){
 		before(function(done){
 			server = serverBuilder(config, done);
 		});
+		it("should run", function(done){
+			done();
+		});
 		describe("ProfileAdmin is logged (and secondary profile)", function(){
 			var superUserToken, profileId, profileAdminPassword, profileAdminLogin, profileAdminToken,
 			secondProfileId,leaderLogin, leaderPassword, projectId, leaderToken;
@@ -131,9 +134,10 @@ roles.forEach(function(role){
 				.end(function(err, res){
 					expect(res.status).to.be.equal(200);
 					expect(res.body.login).to.be.a("string");
+					expect(res.body.accountId).to.be.above(0);
+					expect(res.body.roleId).to.be.above(0);
 					var smsData = server.getSmsDebug(res.body.login);
 					expect(smsData.password).to.be.a("string");
-					expect(smsData.accountId).to.be.above(0);
 					done();
 				});
 			});
@@ -188,9 +192,8 @@ roles.forEach(function(role){
 				.end(function(err, res){
 					expect(res.status).to.be.equal(200);
 					expect(res.body.login).to.be.a("string");
-					expect(res.body.id).to.be.above(0);
-					// var smsData = server.getSmsDebug(res.body.login);
-					// expect(smsData.password).to.be.a("string");
+					expect(res.body.accountId).to.be.above(0);
+					expect(res.body.roleId).to.be.above(0);
 					done();
 				});
 			});
@@ -206,8 +209,9 @@ roles.forEach(function(role){
 					.end(function(err, res){
 						expect(res.status).to.be.equal(200);
 						expect(res.body.login).to.be.a("string");
-						expect(res.body.id).to.be.above(0);
-						coworkerRoleId = res.body.id;
+					expect(res.body.accountId).to.be.above(0);
+					expect(res.body.roleId).to.be.above(0);
+						coworkerRoleId = res.body.roleId;
 						done();
 					});
 				});
