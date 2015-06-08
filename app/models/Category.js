@@ -38,6 +38,7 @@ module.exports = function(sequelize, DataTypes) {
 		classMethods: {
 			associate: function (models) {
 				Category.belongsTo(models.Project);
+				Category.hasMany(models.Image);
 			}
 		}
 	});
