@@ -5,7 +5,7 @@ test:
 	@DEBUG=server NODE_ENV=development ./node_modules/.bin/mocha --check-leaks --timeout 7000 mocha/tests \
 
 testbuild:
-	@DEBUG=server NODE_ENV=development ./node_modules/.bin/mocha --check-leaks --timeout 30000 mocha/builder \
+	@DEBUG=server NODE_ENV=development ./node_modules/.bin/mocha --check-leaks --timeout 50000 mocha/builder \
 
 #wywołuje pojedyńczy test
 #make testone file=<nazwapliku bez .js>

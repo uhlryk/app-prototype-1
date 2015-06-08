@@ -5,7 +5,8 @@
  * project_id
  * warranty_date liczba określająca liczbę miesięcy jakie trwa gwarancja
  * is_new_leader jeśli true to musimy podać przynajmniej telefon nowego lidera
- *
+ * return
+ * {accountId, login, projectId}
  */
 
 var express = require('express');
@@ -36,10 +37,21 @@ router.post("/mode/service/", RuleAccess.isAllowed(), function(req, res){
 	})
 	.then(function(data){
 		if(data.accountOperation === 'CREATE_NEW' || data.accountOperation === 'ACTIVE_PROPOSITION'){
-			//wysyłamy sms
-			return res.sendData(200);
+			req.app.get('sms').send(data.accountModel.phone, {
+				firstname : data.accountModel.firstname,
+				lastname : data.accountModel.lastname,
+				accountId : data.accountModel.id,
+				password : data.password,
+				phone : data.accountModel.phone,
+			}, function(err, message){
+				if(err){
+					//todo: zwrócić jakis błąd gdy sms nie wyjdzie
+				}
+				return res.sendData(200, {accountId : data.accountModel.id, login: data.accountModel.phone, projectId: data.projectModel.id});
+			});
 		} else {
-			return res.sendData(200);
+			//ponieważ konto było aktywne nie znamy jego hasła.
+			return res.sendData(200, {accountId : data.accountModel.id, login: data.accountModel.phone, projectId: data.projectModel.id});
 		}
 	})
 	.catch(function (err) {

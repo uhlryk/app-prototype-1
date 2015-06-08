@@ -106,6 +106,21 @@ module.exports = function(server, url){
 				cb();
 			});
 		},
+		setProjectServiceMode : function(leaderToken, projectId, phone, cb){
+			request.post(url + "/projects/mode/service")
+			.set('access-token', leaderToken)
+			.send({"project_id":projectId})
+			.send({"warranty_date": "2015-03-01"})
+			.send({"is_new_leader": true})
+			.send({phone : phone})
+			.send({firmname : "FirmaB"})
+			.end(function(err, res){
+				expect(res.status).to.be.equal(200);
+				expect(res.body.accountId).to.be.above(0);
+				expect(res.body.projectId).to.be.equal(projectId);
+				cb(res.body.login, res.body.projectId, res.body.accountId);
+			});
+		},
 		/**
 		 * Logowanie normalnego usera (różny od superadmin)
 		 * @param  {[string}   login    [description]

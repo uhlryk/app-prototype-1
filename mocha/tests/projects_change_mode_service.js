@@ -143,6 +143,11 @@ describe("project Change mode to service test: ", function(){
 				.send({firmname : "FirmaA"})
 				.end(function(err, res){
 					expect(res.status).to.be.equal(200);
+					expect(res.body.accountId).to.be.above(0);
+					expect(res.body.projectId).to.be.equal(projectId);
+					var smsData = server.getSmsDebug(res.body.login);
+					console.log(smsData);
+					expect(smsData.password).to.be.a("string");
 					done();
 				});
 			});

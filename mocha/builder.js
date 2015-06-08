@@ -45,6 +45,31 @@ module.exports = function(server, url){
 						countProjects ++;
 						return createProjects(countProjects, profileData);
 					});
+				})
+				.then(function(){//tworzymy projekty BUILD dla danego profilu
+					var countProjects = initProjectNumber;
+					return Promise.map(new Array(buildProjectNumber) , function() {
+						countProjects ++;
+						return createProjects(countProjects, profileData)
+						.then(function(project){
+							return setProjectBuildMode(project);
+						});
+					});
+				})
+				.then(function(){//tworzymy projekty BUILD dla danego profilu
+					var countProjects = initProjectNumber + serviceProjectNumber;
+					return Promise.map(new Array(serviceProjectNumber) , function() {
+						countProjects ++;
+						var projectData;
+						return createProjects(countProjects, profileData)
+						.then(function(project){
+							projectData = project;
+							return setProjectBuildMode(projectData);
+						})
+						.then(function(){
+							return setProjectServiceMode(projectData);
+						});
+					});
 				});
 			});
 		})
@@ -83,65 +108,35 @@ module.exports = function(server, url){
 				helper.loginUser(login, password, function(token){
 					result.users[accountId]= {id:accountId, login:login, password:password, token : token, role :"PROJECT_LEADER", projectId:projectId};
 					profile.projects.push(projectId);
-					result.projects[projectId] = {id:projectId, type :"INIT", users:[accountId], leader:accountId};
+					result.projects[projectId] = {id:projectId, type :"INIT", users:[accountId], leaderId:accountId, profileId:profile.id};
+					resolve(result.projects[projectId]);
+				});
+			});
+		});
+	}
+	function setProjectBuildMode(project){
+		return new Promise(function(resolve) {
+			var leader = result.users[project.leaderId];
+			helper.setProjectBuildMode(leader.token, project.id, function(){
+				project.type="BUILD";
+				resolve();
+			});
+		});
+	}
+	function setProjectServiceMode(project){
+		return new Promise(function(resolve) {
+			var leader = result.users[project.leaderId];
+			helper.setProjectServiceMode(leader.token, project.id, "+48" + (803000000+project.profileId*1000+project.id),function(login, projectId, accountId){
+				var password = server.getSmsDebug(login).password;
+				helper.loginUser(login, password, function(token){
+					leader.role = "COWORKER";
+					result.users[accountId]= {id:accountId, login:login, password:password, token : token, role :"PROJECT_LEADER", projectId:projectId};
+					project.type="SERVICE";
+					project.leaderId = accountId;
+					project.users.push(accountId);
 					resolve();
 				});
 			});
 		});
 	}
-	// function createProfiles(result, act, max, cb){
-	// 	helper.createProfile(result.superUserToken, "Firm"+act, function(id){
-	// 		var count = act + 1;
-	// 		result.profiles[id]={id:id,admins:[]};
-	// 		if(count < max){
-	// 			createProfiles(result, count, max, cb);
-	// 		} else {
-	// 			cb();
-	// 		}
-	// 	});
-	// }
-	// function createProfileAdmins(result, actProfile, maxProfile, actAdmin, maxAdmin, cb){
-	// 	var profile = result.profiles[actProfile];
-	// 	helper.createProfileAdmin(result.superUserToken, profile.id, "+48" + (801000000 + actProfile*1000 + actAdmin), function(login){
-	// 		var countAdmin = actAdmin + 1;
-	// 		var countProfile = actProfile;
-	// 		var password = server.getSmsDebug(login).password;
-	// 		helper.loginUser(login, password, function(token){
-	// 			result.admins.push({login:login, password:password, profileId:profile.id, token : token});
-	// 			result.profiles[actProfile].admins.push(result.admins.length-1);
-	// 			if(countAdmin >= maxAdmin){
-	// 				countAdmin = 0;
-	// 				countProfile++;
-	// 			}
-	// 			if(countProfile < maxProfile){
-	// 				createProfileAdmins(result, countProfile, maxProfile, countAdmin, maxAdmin, cb);
-	// 			} else {
-	// 				cb();
-	// 			}
-	// 		});
-	// 	});
-	// }
-	// function createProjects(result, actProfile, maxProfile, actProject, maxProject, cb){
-	// 	var profile = result.profiles[actProfile];
-	// 	var admin = profile.admins[0];
-	// 	helper.createProject(admin.token, profile.id, 'BASIC', "Nazwa" + actProfile + actProject, "+48791990000" + (actProfile * 100) + (actProject), function(login, projectId){
-	// 		var countProject = actProject + 1;
-	// 		var countProfile = actProfile;
-	// 		var password = server.getSmsDebug(login).password;
-	// 		helper.loginUser(login, password, function(token){
-	// 			result.users.push({login:login, password:password, token : token});
-	// 			result.profiles[actProfile].admins.push(result.admins.length-1);
-	// 			if(countAdmin >= maxAdmin){
-	// 				countAdmin = 0;
-	// 				countProfile++;
-	// 			}
-	// 			if(countProfile < maxProfile){
-	// 				createProfileAdmins(result, countProfile, maxProfile, countAdmin, maxAdmin, cb);
-	// 			} else {
-	// 				cb();
-	// 			}
-	// 		});
-	// 	});
-	// }
-	//TODO: tworzenie projektów osobno dla każdego trybu
 };

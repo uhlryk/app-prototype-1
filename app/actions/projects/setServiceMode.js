@@ -13,12 +13,13 @@
  * data.firmname
  * data.password
  * return
- * {accountModel: accountModel, projectModel:projectModel, accountOperation: [CREATE_NEW | ACTIVE_PROPOSITION | ACTIVE]}
+ * {accountModel, projectModel, accountOperation: [CREATE_NEW | ACTIVE_PROPOSITION | ACTIVE], password}
  */
 module.exports = function(data, transaction, models, actions){
 	var accountOperation;
 	var projectModel;
 	var accountModel;
+	var password;
 	/**
 	 * Wyciągamy projekt na podstawie id który chcemy zmienić
 	 */
@@ -60,6 +61,7 @@ module.exports = function(data, transaction, models, actions){
 			.then(function(resultData){
 				accountOperation = resultData.operation;
 				accountModel = resultData.model;
+				password = resultData.password;
 			});
 		} else {//zostaje stary PROJECT_LEADER nic więc nie robimy
 
@@ -70,7 +72,8 @@ module.exports = function(data, transaction, models, actions){
 			resolve({
 				projectModel: projectModel,
 				accountModel: accountModel,
-				accountOperation: accountOperation
+				accountOperation: accountOperation,
+				password: password
 			});
 		});
 	});
