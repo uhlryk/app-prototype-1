@@ -15,6 +15,16 @@ module.exports = function(server, url){
 		result.profiles = {};
 		result.users = {};
 		result.projects = {};
+		result.roles = {
+			PROFILE_ADMIN : [],
+			PROJECT_LEADER : [],
+			COWORKER : []
+		};
+		result.modes = {
+			INIT : [],
+			BUILD : [],
+			SERVICE : []
+		};
 		var profileId, profileAdminPassword, profileAdminLogin, profileAdminToken,
 		secondProfileId,leaderLogin, leaderPassword, projectId, leaderToken;
 		new Promise(function(resolve) {
@@ -74,7 +84,7 @@ module.exports = function(server, url){
 			});
 		})
 		.then(function(){
-			console.log(result);
+			console.log(result.modes);
 			cb();
 		})
 		;
@@ -95,6 +105,7 @@ module.exports = function(server, url){
 				helper.loginUser(login, password, function(token){
 					result.users[id]= {id:id, login:login, password:password, profileId:profile.id, token : token, role:"PROFILE_ADMIN"};
 					profile.admins.push(id);
+					result.roles.PROFILE_ADMIN.push(id);
 					resolve();
 				});
 			});
@@ -109,6 +120,8 @@ module.exports = function(server, url){
 					result.users[accountId]= {id:accountId, login:login, password:password, token : token, role :"PROJECT_LEADER", projectId:projectId};
 					profile.projects.push(projectId);
 					result.projects[projectId] = {id:projectId, type :"INIT", users:[accountId], leaderId:accountId, profileId:profile.id};
+					result.roles.PROJECT_LEADER.push(accountId);
+					result.modes.INIT.push(projectId);
 					resolve(result.projects[projectId]);
 				});
 			});
@@ -119,6 +132,8 @@ module.exports = function(server, url){
 			var leader = result.users[project.leaderId];
 			helper.setProjectBuildMode(leader.token, project.id, function(){
 				project.type="BUILD";
+				result.modes.BUILD.push(project.id);
+				deleteArrayElement(result.modes.INIT, project.id);
 				resolve();
 			});
 		});
@@ -130,13 +145,24 @@ module.exports = function(server, url){
 				var password = server.getSmsDebug(login).password;
 				helper.loginUser(login, password, function(token){
 					leader.role = "COWORKER";
+					result.roles.COWORKER.push(leader.id);
+					deleteArrayElement(result.roles.PROJECT_LEADER, leader.id);
 					result.users[accountId]= {id:accountId, login:login, password:password, token : token, role :"PROJECT_LEADER", projectId:projectId};
 					project.type="SERVICE";
 					project.leaderId = accountId;
 					project.users.push(accountId);
+					result.roles.PROJECT_LEADER.push(accountId);
+					result.modes.SERVICE.push(project.id);
+					deleteArrayElement(result.modes.BUILD, project.id);
 					resolve();
 				});
 			});
 		});
 	}
 };
+function deleteArrayElement(arr, element){
+	var index = arr.indexOf(element);
+	if (index > -1) {
+		arr.splice(index, 1);
+	}
+}
