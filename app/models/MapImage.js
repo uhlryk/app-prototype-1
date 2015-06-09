@@ -17,7 +17,7 @@ module.exports = function(sequelize, DataTypes) {
 		classMethods: {
 			associate: function (models) {
 				MapImage.belongsTo(models.Project);
-				MapImage.hasMany(models.Image);
+				MapImage.hasMany(models.Photo);
 			}
 		}
 	});

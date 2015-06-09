@@ -47,7 +47,7 @@ function superAdminAllowed(){
  */
 function profileAdminAllowed(){
 	return function(userData, params){
-		var profileId = params.body.profile_id;
+		var profileId = Number(params.body.profile_id);
 		if(userData && userData.Account && userData.Account.ProfileId){
 			return (profileId === userData.Account.ProfileId);
 		}
@@ -62,7 +62,7 @@ function profileAdminAllowed(){
  */
 function projectRoleAllowed(role){
 	return function(userData, params){
-		var projectId = params.body.project_id;
+		var projectId = Number(params.body.project_id);
 		if(userData && userData.Account && userData.Account.ProjectAccounts && userData.Account.ProjectAccounts.some){
 			return userData.Account.ProjectAccounts.some(function(roleData){
 				if(roleData.Project && roleData.Project.status === 'ACTIVE' && roleData.role === role && projectId > 0 && roleData.ProjectId === projectId){
@@ -80,11 +80,29 @@ function projectRoleAllowed(role){
  */
 function roleFirmnameAllowed(role){
 	return function(userData, params){
-		var projectId = params.body.project_id;
+		var projectId = Number(params.body.project_id);
 		var firmname = params.body.firmname;
 		if(userData && userData.Account && userData.Account.ProjectAccounts && userData.Account.ProjectAccounts.some){
 			return userData.Account.ProjectAccounts.some(function(roleData){
 				if(roleData.Project && roleData.Project.status === 'ACTIVE' && roleData.role === role && projectId > 0 && roleData.ProjectId === projectId && roleData.firmname === firmname){
+					return true;
+				}
+				return false;
+			});
+		}
+		return false;
+	};
+}
+/**
+ * uprawnienie jest wtedy gdy user ma jakąkolwiek rolę w danym projekcie
+ * @return {[type]} [description]
+ */
+function projectAnyRoleAllowed(){
+	return function(userData, params){
+		var projectId = Number(params.body.project_id);
+		if(userData && userData.Account && userData.Account.ProjectAccounts && userData.Account.ProjectAccounts.some){
+			return userData.Account.ProjectAccounts.some(function(roleData){
+				if(roleData.Project && roleData.Project.status === 'ACTIVE' && projectId > 0 && roleData.ProjectId === Number(projectId)){
 					return true;
 				}
 				return false;
@@ -175,5 +193,9 @@ module.exports = function(ruleAccess) {
 		projectRoleAllowed('COWORKER'),
 		projectRoleAllowed('INVESTOR'),
 		roleFirmnameAllowed('SUBCONTRACTOR'),
+	]));
+
+	ruleAccess.addRule("POST/photos/", RuleAccess.rule.anyOnRuleList([
+		projectAnyRoleAllowed()
 	]));
 };

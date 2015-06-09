@@ -2,7 +2,7 @@
  * Model przechowuje meta dane każdego zdjęcia. Same zdjęcie przechowywane są na dysku lub amazonie
  */
 module.exports = function(sequelize, DataTypes) {
-	var Image = sequelize.define("Image",{
+	var Photo = sequelize.define("Photo",{
 		status: {
 			type: DataTypes.ENUM('ACTIVE', 'DELETE'),
 			defaultValue:'ACTIVE',
@@ -29,13 +29,13 @@ module.exports = function(sequelize, DataTypes) {
 		freezeTableName: true,
 		classMethods: {
 			associate: function (models) {
-				Image.belongsTo(models.Project);
-				Image.belongsTo(models.Account);
-				Image.belongsTo(models.Category);
-				Image.belongsTo(models.MapImage);
-				Image.hasMany(models.ImagePermission);
+				Photo.belongsTo(models.Project);
+				Photo.belongsTo(models.Account);
+				Photo.belongsTo(models.Category);
+				Photo.belongsTo(models.MapImage);
+				Photo.hasMany(models.PhotoPermission);
 			}
 		}
 	});
-	return Image;
+	return Photo;
 };
