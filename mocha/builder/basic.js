@@ -27,7 +27,8 @@ describe("Create project test: ", function(){
 				designer : 2,
 				subcontractor_1: 2,
 				subcontractor_2 : 2
-			}, function(){
+			}, function(result){
+				console.log(result);
 				done();
 			});
 		});

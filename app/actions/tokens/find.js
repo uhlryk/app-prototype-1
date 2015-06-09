@@ -52,7 +52,7 @@ module.exports = function(data, transaction, models, actions){
 				where : {
 					status : 'ACTIVE'
 				},
-				attributes: ['role', 'ProjectId'],
+				attributes: ['role', 'ProjectId', 'firmname'],
 				required: false,
 				include : [{
 					model : models.Project,

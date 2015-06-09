@@ -1,6 +1,53 @@
 var config = require("../config/local_test.js");
 var url = 'http://localhost:' + config.app.port;
 var Promise = require("bluebird");
+/**
+ * Moduł wypełnia kompletnie aplikację określonymi danymi
+ * argument:
+ * {
+ * 	profile:liczba profili,
+ * 	admin : liczba adminów na profil,
+ * 	initProject: liczba projektów w trybie INIT na profil,
+ * 	buildProject: liczba projektów w trybie BUILD na profil,
+ * 	serviceProject: liczba projektów w trybie SERVICE na profil,
+ * 	investor : liczba userów z rolą INVESTOR na profil,
+ * 	coworker :liczba userów z rolą COWORKER na profil,
+ * 	inspector : liczba userów z rolą INSPECTOR na profil,
+ * 	designer : liczba userów z rolą DESIGNER na profil,
+ * 	subcontractor_1: liczba userów z rolą SUBCONTRACTOR z firma A na profil,
+ * 	subcontractor_2 : liczba userów z rolą SUBCONTRACTOR z firma B na profil,
+ * }
+ * return:
+ * {
+ * 	profileList:[<profileId>]
+ * 	profiles:{
+ * 		<profileId>:{id:profileId,adminList:[<adminId>], projectList:[<projectId>]}
+ * 	},
+ * 	projects:{
+ * 		<projectId>:{id:projectId, type :<"INIT"|"BUILD"|"SERVICE">, userList:[<accountId>], leaderId:leaderAccountId, profileId:projectProfileId};
+ * 	},
+ * 	users:{
+ * 		<accountId>:{id:accountId, login:userLogin, password:userPassword, profileId:projectProfileId, token : token,
+ * 								role :<"PROJECT_LEADER"|"PROFILE_ADMIN"|"COWORKER"|"INVESTOR"|"INSPECTOR"...>, projectId?:projectId(profileAdmin nie ma,
+ * 								firmname?:firmname jeśli normal user)};
+ * 	},
+ * 	roles:{
+ * 		PROFILE_ADMIN : [<accountId>],
+ * 		PROJECT_LEADER : [<accountId>],
+ * 		COWORKER : [<accountId>],
+ * 		INVESTOR : [<accountId>],
+ * 		INSPECTOR : [<accountId>],
+ * 		DESIGNER : [<accountId>],
+ * 		SUBCONTRACTOR : [<accountId>],
+ * 	},
+ * 	modes:{
+ * 		INIT:[<projectId>],
+ * 		BUILD:[<projectId>],
+ * 		SERVICE:[<projectId>],
+ * 	}
+ * }
+ */
+
 module.exports = function(server, url){
 	var helper = require("./helper.js")(server, url);
 	var result;
@@ -19,6 +66,7 @@ module.exports = function(server, url){
 
 		result = {};
 		result.profiles = {};
+		result.profileList = [];
 		result.users = {};
 		result.projects = {};
 		result.roles = {
@@ -61,13 +109,15 @@ module.exports = function(server, url){
 				})
 				.then(function(){//tworzymy projekty init dla danego profilu
 					var countProjects = 0;
+					if(!initProjectNumber)return;
 					return Promise.map(new Array(initProjectNumber) , function() {
 						countProjects ++;
 						return createProjects(countProjects, profileData);
 					});
 				})
 				.then(function(){//tworzymy projekty BUILD dla danego profilu
-					var countProjects = initProjectNumber;
+					var countProjects = initProjectNumber?initProjectNumber:0;
+					if(!buildProjectNumber)return;
 					return Promise.map(new Array(buildProjectNumber) , function() {
 						countProjects ++;
 						var projectData;
@@ -83,7 +133,8 @@ module.exports = function(server, url){
 					});
 				})
 				.then(function(){//tworzymy projekty BUILD dla danego profilu
-					var countProjects = initProjectNumber + serviceProjectNumber;
+					var countProjects = initProjectNumber?initProjectNumber:0 + buildProjectNumber?buildProjectNumber:0;
+					if(!serviceProjectNumber)return;
 					return Promise.map(new Array(serviceProjectNumber) , function() {
 						countProjects ++;
 						var projectData;
@@ -104,8 +155,8 @@ module.exports = function(server, url){
 			});
 		})
 		.then(function(){
-			console.log(result.roles);
-			cb();
+			// console.log(result);
+			cb(result);
 		})
 		;
 	};
@@ -113,7 +164,8 @@ module.exports = function(server, url){
 	function createProfiles(num){
 		return new Promise(function(resolve) {
 			helper.createProfile(result.superUserToken, "Firm"+num, function(id){
-				result.profiles[id]={id:id,admins:[], projects:[]};
+				result.profiles[id]={id:id,adminList:[], projectList:[]};
+				result.profileList.push(id);
 				resolve(result.profiles[id]);
 			});
 		});
@@ -124,7 +176,7 @@ module.exports = function(server, url){
 				var password = server.getSmsDebug(login).password;
 				helper.loginUser(login, password, function(token){
 					result.users[id]= {id:id, login:login, password:password, profileId:profile.id, token : token, role:"PROFILE_ADMIN"};
-					profile.admins.push(id);
+					profile.adminList.push(id);
 					result.roles.PROFILE_ADMIN.push(id);
 					resolve();
 				});
@@ -133,13 +185,13 @@ module.exports = function(server, url){
 	}
 	function createProjects(num, profile){
 		return new Promise(function(resolve) {
-			var admin = result.users[profile.admins[0]];//dla danego profilu pierwszy admin
+			var admin = result.users[profile.adminList[0]];//dla danego profilu pierwszy admin
 			helper.createProject(admin.token, profile.id, 'BASIC', "Nazwa"+profile.id+num, "+48" + (802000000+profile.id*1000+num), function(login, projectId, accountId){
 				var password = server.getSmsDebug(login).password;
 				helper.loginUser(login, password, function(token){
-					result.users[accountId]= {id:accountId, login:login, password:password, token : token, role :"PROJECT_LEADER", projectId:projectId};
-					profile.projects.push(projectId);
-					result.projects[projectId] = {id:projectId, type :"INIT", users:[accountId], leaderId:accountId, profileId:profile.id};
+					result.users[accountId]= {id:accountId, login:login, password:password, profileId:profile.id, token : token, role :"PROJECT_LEADER", projectId:projectId};
+					profile.projectList.push(projectId);
+					result.projects[projectId] = {id:projectId, type :"INIT", userList:[accountId], leaderId:accountId, profileId:profile.id};
 					result.roles.PROJECT_LEADER.push(accountId);
 					result.modes.INIT.push(projectId);
 					resolve(result.projects[projectId]);
@@ -167,10 +219,10 @@ module.exports = function(server, url){
 					leader.role = "COWORKER";
 					result.roles.COWORKER.push(leader.id);
 					deleteArrayElement(result.roles.PROJECT_LEADER, leader.id);
-					result.users[accountId]= {id:accountId, login:login, password:password, token : token, role :"PROJECT_LEADER", projectId:projectId};
+					result.users[accountId]= {id:accountId, login:login, password:password, profileId:leader.profileId, token : token, role :"PROJECT_LEADER", projectId:projectId};
 					project.type="SERVICE";
 					project.leaderId = accountId;
-					project.users.push(accountId);
+					project.userList.push(accountId);
 					result.roles.PROJECT_LEADER.push(accountId);
 					result.modes.SERVICE.push(project.id);
 					deleteArrayElement(result.modes.BUILD, project.id);
@@ -183,18 +235,19 @@ module.exports = function(server, url){
 		var count = 0;
 		var subcount =0 ;
 		return Promise.map(new Array(6) , function() {
-		var role = "COWORKER";
-		var firmname = "firmB";
-		var num;
+			var role = "COWORKER";
+			var firmname = "firmB";
+			var num;
 			count++;
 			switch(count){
-				case 1: role="INVESTOR";firmname="firmInvestor";num=investorNumber;break;
-				case 2: role="COWORKER";firmname="firmCoworker";num=coworkerNumber;break;
-				case 3: role="INSPECTOR";firmname="firmInspector";num=inspectorNumber;break;
-				case 4: role="DESIGNER";firmname="firmDesigner";num=designerNumber;break;
-				case 5: role="SUBCONTRACTOR";firmname="firmSubA";num=subcontractor1Number;break;
-				case 6: role="SUBCONTRACTOR";firmname="firmSubB";num=subcontractor2Number;break;
+				case 1: role="INVESTOR";firmname="firmInvestor";num=investorNumber?investorNumber:0;break;
+				case 2: role="COWORKER";firmname="firmCoworker";num=coworkerNumber?coworkerNumber:0;break;
+				case 3: role="INSPECTOR";firmname="firmInspector";num=inspectorNumber?inspectorNumber:0;break;
+				case 4: role="DESIGNER";firmname="firmDesigner";num=designerNumber?designerNumber:0;break;
+				case 5: role="SUBCONTRACTOR";firmname="firmSubA";num=subcontractor1Number?subcontractor1Number:0;break;
+				case 6: role="SUBCONTRACTOR";firmname="firmSubB";num=subcontractor2Number?subcontractor2Number:0;break;
 			}
+			if(!num)return;
 			return Promise.map(new Array(num) , function() {
 				subcount++;
 				return createUser(subcount, role, firmname, project);
@@ -207,8 +260,8 @@ module.exports = function(server, url){
 			helper.createUser(leader.token, project.id, role, "+48" + (804000000+project.id*1000+num), firmname, function(login, accountId, roleId){
 				var password = server.getSmsDebug(login).password;
 				helper.loginUser(login, password, function(token){
-					result.users[accountId]= {id:accountId, login:login, password:password, token : token, role :role, projectId:project.id};
-					project.users.push(accountId);
+					result.users[accountId]= {id:accountId, login:login, password:password, profileId:leader.profileId, token : token, role :role, projectId:project.id, firmname:firmname};
+					project.userList.push(accountId);
 					result.roles[role].push(accountId);
 					resolve();
 				});
