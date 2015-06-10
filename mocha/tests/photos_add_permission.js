@@ -90,7 +90,8 @@ describe("Create project test: ", function(){
 			it("should not return 401 auth error, when adding photo in own project", function(done){
 				request.post(url + "/photos")
 				.set('access-token', leaderFirst.token)
-				.send({"project_id": projectFirst.id})
+				.field("project_id",projectFirst.id)
+				.attach("photo","mocha/attachements/normalImage.jpg")
 				.end(function(err, res){
 					expect(res.status).to.not.be.equal(401);
 					done();
@@ -99,7 +100,8 @@ describe("Create project test: ", function(){
 			it("should return 401 auth error, when adding photo in other project", function(done){
 				request.post(url + "/photos")
 				.set('access-token', leaderFirst.token)
-				.send({"project_id": projectSecond.id})
+				.field("project_id",projectSecond.id)
+				.attach("photo","mocha/attachements/normalImage.jpg")
 				.end(function(err, res){
 					expect(res.status).to.be.equal(401);
 					done();
@@ -110,7 +112,8 @@ describe("Create project test: ", function(){
 			it("should not return 401 auth error, when adding photo in own project", function(done){
 				request.post(url + "/photos")
 				.set('access-token', adminFirst.token)
-				.send({"project_id": projectFirst.id})
+				.field("project_id",projectFirst.id)
+				.attach("photo","mocha/attachements/normalImage.jpg")
 				.end(function(err, res){
 					expect(res.status).to.not.be.equal(401);
 					done();
@@ -119,7 +122,8 @@ describe("Create project test: ", function(){
 			it("should return 401 auth error, when adding photo in other project", function(done){
 				request.post(url + "/photos")
 				.set('access-token', adminFirst.token)
-				.send({"project_id": projectSecond.id})
+				.field("project_id",projectSecond.id)
+				.attach("photo","mocha/attachements/normalImage.jpg")
 				.end(function(err, res){
 					expect(res.status).to.be.equal(401);
 					done();
@@ -130,7 +134,8 @@ describe("Create project test: ", function(){
 			it("should not return 401 auth error, when adding photo in own project", function(done){
 				request.post(url + "/photos")
 				.set('access-token', investorFirst.token)
-				.send({"project_id": projectFirst.id})
+				.field("project_id",projectFirst.id)
+				.attach("photo","mocha/attachements/normalImage.jpg")
 				.end(function(err, res){
 					expect(res.status).to.not.be.equal(401);
 					done();
@@ -139,7 +144,8 @@ describe("Create project test: ", function(){
 			it("should return 401 auth error, when adding photo in other project", function(done){
 				request.post(url + "/photos")
 				.set('access-token', investorFirst.token)
-				.send({"project_id": projectSecond.id})
+				.field("project_id",projectSecond.id)
+				.attach("photo","mocha/attachements/normalImage.jpg")
 				.end(function(err, res){
 					expect(res.status).to.be.equal(401);
 					done();
@@ -150,7 +156,8 @@ describe("Create project test: ", function(){
 			it("should not return 401 auth error, when adding photo in own project", function(done){
 				request.post(url + "/photos")
 				.set('access-token', inspectorFirst.token)
-				.send({"project_id": projectFirst.id})
+				.field("project_id",projectFirst.id)
+				.attach("photo","mocha/attachements/normalImage.jpg")
 				.end(function(err, res){
 					expect(res.status).to.not.be.equal(401);
 					done();
@@ -159,7 +166,8 @@ describe("Create project test: ", function(){
 			it("should return 401 auth error, when adding photo in other project", function(done){
 				request.post(url + "/photos")
 				.set('access-token', inspectorFirst.token)
-				.send({"project_id": projectSecond.id})
+				.field("project_id",projectSecond.id)
+				.attach("photo","mocha/attachements/normalImage.jpg")
 				.end(function(err, res){
 					expect(res.status).to.be.equal(401);
 					done();
@@ -170,7 +178,8 @@ describe("Create project test: ", function(){
 			it("should not return 401 auth error, when adding photo in own project", function(done){
 				request.post(url + "/photos")
 				.set('access-token', designerFirst.token)
-				.send({"project_id": projectFirst.id})
+				.field("project_id",projectFirst.id)
+				.attach("photo","mocha/attachements/normalImage.jpg")
 				.end(function(err, res){
 					expect(res.status).to.not.be.equal(401);
 					done();
@@ -179,7 +188,8 @@ describe("Create project test: ", function(){
 			it("should return 401 auth error, when adding photo in other project", function(done){
 				request.post(url + "/photos")
 				.set('access-token', designerFirst.token)
-				.send({"project_id": projectSecond.id})
+				.field("project_id",projectSecond.id)
+				.attach("photo","mocha/attachements/normalImage.jpg")
 				.end(function(err, res){
 					expect(res.status).to.be.equal(401);
 					done();
@@ -190,7 +200,8 @@ describe("Create project test: ", function(){
 			it("should not return 401 auth error, when adding photo in own project", function(done){
 				request.post(url + "/photos")
 				.set('access-token', subcontractorFirst.token)
-				.send({"project_id": projectFirst.id})
+				.field("project_id",projectFirst.id)
+				.attach("photo","mocha/attachements/normalImage.jpg")
 				.end(function(err, res){
 					expect(res.status).to.not.be.equal(401);
 					done();
@@ -199,7 +210,8 @@ describe("Create project test: ", function(){
 			it("should return 401 auth error, when adding photo in other project", function(done){
 				request.post(url + "/photos")
 				.set('access-token', subcontractorFirst.token)
-				.send({"project_id": projectSecond.id})
+				.field("project_id",projectSecond.id)
+				.attach("photo","mocha/attachements/normalImage.jpg")
 				.end(function(err, res){
 					expect(res.status).to.be.equal(401);
 					done();

@@ -99,6 +99,9 @@ function roleFirmnameAllowed(role){
  */
 function projectAnyRoleAllowed(){
 	return function(userData, params){
+		// console.log("A1");
+		// console.log(params.body);
+		// console.log("A2");
 		var projectId = Number(params.body.project_id);
 		if(userData && userData.Account && userData.Account.ProjectAccounts && userData.Account.ProjectAccounts.some){
 			return userData.Account.ProjectAccounts.some(function(roleData){

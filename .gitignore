@@ -9,5 +9,5 @@ coverage
 plato
 gulp/ssh_logs
 deploy
-uploads
+public/photos
 

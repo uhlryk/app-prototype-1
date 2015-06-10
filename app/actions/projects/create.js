@@ -59,19 +59,19 @@ module.exports = function(data, transaction, models, actions){
 		return models.Category.create({ProjectId : projectModel.id, type: "TO_RECEIVE", mode: "BUILD", name: "do odbioru", priority: 1}, {transaction : transaction});
 	})
 	.then(function(){
-		return models.Category.create({ProjectId : projectModel.id, type: "FAULT", mode: "BUILD", name: "usterka", priority: 2}, {transaction : transaction});
+		return models.Category.create({ProjectId : projectModel.id, type: "FAULT_BUILD", mode: "BUILD", name: "usterka", priority: 2}, {transaction : transaction});
 	})
 	.then(function(){
 		return models.Category.create({ProjectId : projectModel.id, type: "ADVANCEMENT", mode: "BUILD", name: "zaawansowanie prac", priority: 3}, {transaction : transaction});
 	})
 	.then(function(){
-		return models.Category.create({ProjectId : projectModel.id, type: "BHP", mode: "BUILD", name: "BHP", priority: 4}, {transaction : transaction});
+		return models.Category.create({ProjectId : projectModel.id, type: "BHP_BUILD", mode: "BUILD", name: "BHP", priority: 4}, {transaction : transaction});
 	})
 	.then(function(){
-		return models.Category.create({ProjectId : projectModel.id, type: "PROJECT_ISUE", mode: "BUILD", name: "problemy projektowe", priority: 5}, {transaction : transaction});
+		return models.Category.create({ProjectId : projectModel.id, type: "ISUE_BUILD", mode: "BUILD", name: "problemy projektowe", priority: 5}, {transaction : transaction});
 	})
 	.then(function(){
-		return models.Category.create({ProjectId : projectModel.id, type: "DOC_SCAN", mode: "BUILD", name: "skanery pism", priority: 6}, {transaction : transaction});
+		return models.Category.create({ProjectId : projectModel.id, type: "SCAN_BUILD", mode: "BUILD", name: "skanery pism", priority: 6}, {transaction : transaction});
 	})
 	.then(function(){
 		return models.Category.create({ProjectId : projectModel.id, type: "INNOVATION", mode: "BUILD", name: "pokaż innowacje", priority: 7}, {transaction : transaction});
@@ -83,7 +83,7 @@ module.exports = function(data, transaction, models, actions){
 		return models.Category.create({ProjectId : projectModel.id, type: "DISORDER", mode: "BUILD", name: "nieporządek", priority: 9}, {transaction : transaction});
 	})
 	.then(function(){
-		return models.Category.create({ProjectId : projectModel.id, type: "FAULT", mode: "SERVICE", name: "usterka", priority: 0}, {transaction : transaction});
+		return models.Category.create({ProjectId : projectModel.id, type: "FAULT_SERVICE", mode: "SERVICE", name: "usterka", priority: 0}, {transaction : transaction});
 	})
 	.then(function(){
 		return models.Category.create({ProjectId : projectModel.id, type: "REPORT", mode: "SERVICE", name: "zgłoś usunięcie", priority: 1}, {transaction : transaction});
@@ -92,13 +92,13 @@ module.exports = function(data, transaction, models, actions){
 		return models.Category.create({ProjectId : projectModel.id, type: "REPAIR_FLOW", mode: "SERVICE", name: "przebieg prac naprawczych", priority: 2}, {transaction : transaction});
 	})
 	.then(function(){
-		return models.Category.create({ProjectId : projectModel.id, type: "DOC_SCAN", mode: "SERVICE", name: "skanery pism", priority: 3}, {transaction : transaction});
+		return models.Category.create({ProjectId : projectModel.id, type: "SCAN_SERVICE", mode: "SERVICE", name: "skanery pism", priority: 3}, {transaction : transaction});
 	})
 	.then(function(){
-		return models.Category.create({ProjectId : projectModel.id, type: "BHP", mode: "SERVICE", name: "BHP", priority: 4}, {transaction : transaction});
+		return models.Category.create({ProjectId : projectModel.id, type: "BHP_SERVICE", mode: "SERVICE", name: "BHP", priority: 4}, {transaction : transaction});
 	})
 	.then(function(){
-		return models.Category.create({ProjectId : projectModel.id, type: "PROJECT_ISUE", mode: "SERVICE", name: "problemy projektowe", priority: 5}, {transaction : transaction});
+		return models.Category.create({ProjectId : projectModel.id, type: "ISUE_SERVICE", mode: "SERVICE", name: "problemy projektowe", priority: 5}, {transaction : transaction});
 	})
 	.then(function(){
 		return new Promise(function(resolve){

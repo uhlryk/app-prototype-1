@@ -18,6 +18,7 @@
  */
 
 var express = require('express');
+var fs = require('fs');
 var router = new express.Router();
 var RuleAccess = require('ruleaccess');
 var generatePassword = require('password-generator');
@@ -37,6 +38,9 @@ router.post("/", RuleAccess.isAllowed(), function(req, res){
 		password : generatePassword(12, true),
 	})
 	.then(function(data){
+		try{
+			fs.mkdirSync('./public/photos/'+data.projectModel.id);
+		} catch(e){}
 		if(data.accountOperation === 'CREATE_NEW' || data.accountOperation === 'ACTIVE_PROPOSITION'){
 			req.app.get('sms').send(data.accountModel.phone, {
 				firstname : data.accountModel.firstname,

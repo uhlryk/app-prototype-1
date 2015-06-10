@@ -8,6 +8,17 @@ module.exports = function(sequelize, DataTypes) {
 			defaultValue:'ACTIVE',
 			allowNull: false
 		},
+		name : {
+			type: DataTypes.STRING(55),
+			allowNull: false
+		},
+		mimetype : {
+			type: DataTypes.STRING(15),
+			allowNull: false
+		},
+		size : {
+			type: DataTypes.INTEGER
+		},
 		lat: {
 			type: DataTypes.DECIMAL(11,7),
 			allowNull: true

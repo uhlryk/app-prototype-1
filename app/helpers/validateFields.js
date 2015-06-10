@@ -15,6 +15,13 @@ function validateSingle(req, field){
 			req.checkBody('project_id', 'INVALID_FIELD').isId();
 			req.sanitize('project_id').toInt();
 		break;
+		case 'category':
+			req.checkBody('category', 'REQUIRE_FIELD').notEmpty();
+		break;
+		case 'project_id':
+			req.checkBody('project_id', 'INVALID_FIELD').isId();
+			req.sanitize('project_id').toInt();
+		break;
 		case 'start_date':
 			req.checkBody('start_date', 'INVALID_FIELD').isDate();
 			req.sanitize('start_date').toDate();

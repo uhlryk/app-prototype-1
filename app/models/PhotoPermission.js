@@ -3,8 +3,12 @@
  */
 module.exports = function(sequelize, DataTypes) {
 	var PhotoPermission = sequelize.define("PhotoPermission",{
+		/**
+		 * GW jest to rola wspólna dla COWORKER, PROJECT_LEADER i PROFILE_ADMIN
+		 * @type {Object}
+		 */
 		role: {
-			type: DataTypes.ENUM('PROFILE_ADMIN' ,'PROJECT_LEADER', 'COWORKER', 'INVESTOR', 'INSPECTOR', 'DESIGNER', 'SUBCONTRACTOR'),
+			type: DataTypes.ENUM('GW', 'INVESTOR', 'INSPECTOR', 'DESIGNER', 'SUBCONTRACTOR'),
 			allowNull: false
 		},
 		firmname: {
