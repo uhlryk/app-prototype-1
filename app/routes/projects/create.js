@@ -41,6 +41,12 @@ router.post("/", RuleAccess.isAllowed(), function(req, res){
 		try{
 			fs.mkdirSync('./public/photos/'+data.projectModel.id);
 		} catch(e){}
+		try{
+			fs.mkdirSync('./public/miniatures/'+data.projectModel.id);
+		} catch(e){}
+		try{
+			fs.mkdirSync('./public/maps/'+data.projectModel.id);
+		} catch(e){}
 		if(data.accountOperation === 'CREATE_NEW' || data.accountOperation === 'ACTIVE_PROPOSITION'){
 			req.app.get('sms').send(data.accountModel.phone, {
 				firstname : data.accountModel.firstname,

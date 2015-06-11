@@ -8,8 +8,13 @@ module.exports = function(sequelize, DataTypes) {
 			defaultValue:'ACTIVE',
 			allowNull: false
 		},
+		name : {
+			type: DataTypes.STRING(55),
+			allowNull: false
+		},
 		priority: {
 			type: DataTypes.INTEGER,
+			defaultValue:1
 		},
 	}, {
 		paranoid: true,
@@ -18,6 +23,7 @@ module.exports = function(sequelize, DataTypes) {
 			associate: function (models) {
 				MapImage.belongsTo(models.Project);
 				MapImage.hasMany(models.Photo);
+				MapImage.belongsTo(models.Account);
 			}
 		}
 	});

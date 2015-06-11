@@ -1,8 +1,10 @@
 /*jslint node: true */
 "use strict";
 module.exports = function(config, callback) {
+	// require('look').start();
 	var express = require('express');
 	var path = require('path');
+	var fs = require('fs');
 	var bodyParser = require("body-parser");
 	var logger = require('morgan');
 	var favicon = require('serve-favicon');
@@ -130,5 +132,9 @@ module.exports = function(config, callback) {
 		server.listen(app.get("port"));
 		callback();
 	});
+	try{fs.mkdirSync('./tmp');} catch(e){}
+	try{fs.mkdirSync('./public/photos');} catch(e){}
+	try{fs.mkdirSync('./public/miniatures');} catch(e){}
+	try{fs.mkdirSync('./public/maps'); } catch(e){}
 	return server;
 };

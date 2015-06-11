@@ -201,4 +201,9 @@ module.exports = function(ruleAccess) {
 	ruleAccess.addRule("POST/photos/", RuleAccess.rule.anyOnRuleList([
 		projectAnyRoleAllowed()
 	]));
+	ruleAccess.addRule("POST/maps/", RuleAccess.rule.anyOnRuleList([
+		projectRoleAllowed('PROJECT_LEADER'),
+		projectRoleAllowed('COWORKER'),
+		projectRoleAllowed('PROFILE_ADMIN')
+	]));
 };

@@ -10,4 +10,7 @@ plato
 gulp/ssh_logs
 deploy
 public/photos
+public/miniatures
+public/maps
+tmp
 

@@ -53,6 +53,7 @@ module.exports = function(sequelize, DataTypes) {
 				// Account.hasMany(models.ProjectAccount, {as:'PropositionAuthor'});
 				Account.belongsTo(models.Profile);
 				Account.hasMany(models.Photo);
+				Account.hasMany(models.MapImage);
 			}
 		}
 	});

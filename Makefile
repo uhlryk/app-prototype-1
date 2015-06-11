@@ -10,7 +10,7 @@ testbuild:
 #wywołuje pojedyńczy test
 #make testone file=<nazwapliku bez .js>
 testone:
-	@DEBUG=server NODE_ENV=development ./node_modules/.bin/mocha --check-leaks --timeout 7000 --grep $(file) mocha/tests \
+	@DEBUG=server NODE_ENV=development ./node_modules/.bin/mocha --check-leaks --timeout 17000 mocha/tests/$(file) \
 
 cover:
 	./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha tests --print both --recursive
