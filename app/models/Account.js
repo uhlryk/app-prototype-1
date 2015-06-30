@@ -50,10 +50,13 @@ module.exports = function(sequelize, DataTypes) {
 		classMethods: {
 			associate: function (models) {
 				Account.hasMany(models.ProjectAccount);
+				Account.hasMany(models.Token);
 				// Account.hasMany(models.ProjectAccount, {as:'PropositionAuthor'});
 				Account.belongsTo(models.Profile);
 				Account.hasMany(models.Photo);
 				Account.hasMany(models.MapImage);
+				Account.hasMany(models.Message);
+				Account.hasMany(models.MessageGroupAccount);
 			}
 		}
 	});

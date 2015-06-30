@@ -61,7 +61,6 @@ module.exports = function(config, callback) {
 	app.use(require("./routes/router"));
 
 	var server = http.createServer(app);
-
 	if(config.app.sms === false){
 		server.getSmsDebug = app.get('sms').get;
 	}

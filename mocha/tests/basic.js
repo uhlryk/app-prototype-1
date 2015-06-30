@@ -1,5 +1,5 @@
-var serverBuilder = require("../../app/server.js");
-var config = require("../../config/local_test.js");
+var serverBuilder = require("../../app/server");
+var config = require("../config_select");
 var chai = require("chai");
 chai.use(require('chai-things'));
 var expect = chai.expect;

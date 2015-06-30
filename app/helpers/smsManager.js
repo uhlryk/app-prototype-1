@@ -15,6 +15,10 @@ module.exports = function(isActive) {
 			cb(null, null);
 		};
 		manager.get = function(phone){
+			if(phone === "+48802001001"){
+				console.log("-----");
+				console.log(manager.list);
+			}
 			return manager.list[phone];
 		};
 	} else {

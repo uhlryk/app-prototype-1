@@ -146,6 +146,11 @@ module.exports = function(server, url){
 			request.post(url + "/tokens")
 			.send({ login: login, password: password})
 			.end(function(err, res){
+				if(res.status !== 200){
+					console.log(login + " " + password);
+					console.log(res.status);
+					console.log(res.body);
+				}
 				expect(res.status).to.be.equal(200);
 				expect(res.body.token).to.be.a("string");
 				cb(res.body.token);

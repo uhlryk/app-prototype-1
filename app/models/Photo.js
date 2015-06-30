@@ -45,6 +45,7 @@ module.exports = function(sequelize, DataTypes) {
 				Photo.belongsTo(models.Category);
 				Photo.belongsTo(models.MapImage);
 				Photo.hasMany(models.PhotoPermission);
+				Photo.hasMany(models.MessagePhoto);
 			}
 		}
 	});

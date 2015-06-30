@@ -54,6 +54,7 @@ module.exports = function(sequelize, DataTypes) {
 				Project.belongsTo(models.Profile);
 				Project.hasMany(models.MapImage);
 				Project.hasMany(models.Photo);
+				Project.hasMany(models.MessageGroup);
 				//Project.hasMany(models.Account, {as: 'child', foreignKey: 'parent_id',  through: 'company_relation'});
 			}
 		}

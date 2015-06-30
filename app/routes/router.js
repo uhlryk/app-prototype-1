@@ -39,6 +39,7 @@ router.use(require("./user.js"));
 router.use(require("./project.js"));
 router.use(require("./photo.js"));
 router.use(require("./map.js"));
+router.use(require("./message.js"));
 // gdy nie znaleziono routa catch 404 and forward to error handler fallback
 router.use(function (req, res, next) {
 		var err = new Error('Not Found');

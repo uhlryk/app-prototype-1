@@ -66,6 +66,8 @@ module.exports = function(errorObject) {
 		validationMessage.type = errorObject.type;
 		return validationMessage;
 	} else {
+		console.log("ERROR:");
+		console.log(errorObject);
 		return {
 			message : "OTHER_ERROR"//nie obsłużony błąd
 		};
