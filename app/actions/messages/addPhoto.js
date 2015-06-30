@@ -21,7 +21,7 @@ module.exports = function(data, transaction, models, actions){
 		}
 	},{transaction : transaction})
 	.then(function(role){
-		ownerRole = role.role;
+		ownerRole = checkGWRole(role.role);
 		ownerFirmname = role.firmname;
 		return models.ProjectAccount.findAll({
 			where:{
@@ -34,7 +34,7 @@ module.exports = function(data, transaction, models, actions){
 	})
 	.then(function(recipientRoleModelList){
 		for(var x=0;x<recipientRoleModelList.length; x++){
-			var role = recipientRoleModelList[x].role;
+			var role = checkGWRole(recipientRoleModelList[x].role);
 			var firmname = recipientRoleModelList[x].firmname;
 			if(role === "SUBCONTRACTOR"){
 				if(subcontractorFirmList.indexOf(firmname) === -1){
@@ -108,3 +108,12 @@ module.exports = function(data, transaction, models, actions){
 		});
 	});
 };
+
+function checkGWRole(role){
+	if(role === "PROJECT_LEADER" || role === "PROFILE_ADMIN" || role === "COWORKER"){
+		return "GW";
+	} else{
+		return role;
+	}
+
+}

@@ -38,6 +38,7 @@ module.exports = function(sequelize, DataTypes) {
 		classMethods: {
 			associate: function (models) {
 				MessageGroup.hasMany(models.Message);
+				MessageGroup.hasMany(models.MessageGroupPermission);
 				MessageGroup.hasMany(models.MessageGroupAccount);
 				MessageGroup.belongsTo(models.Project);
 			}

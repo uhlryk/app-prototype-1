@@ -258,6 +258,231 @@ describe("Message test: ", function(){
 				});
 		});
 	});
+	describe("Send public test:", function(){
+		var projectFirst;
+		var projectSecond;
+		var leaderFirst;
+		var leaderSecond;
+		var profileFirst;
+		var profileSecond;
+		var subcontractorFirst;
+		var adminFirst;
+		var coworkerFirst;
+		var investorFirst;
+		var inspectorFirst;
+		var designerFirst;
+		var subcontractorFirstA;
+		var subcontractorFirstB;
+		before(function(done){
+			profileFirst = buildData.profiles[buildData.profileList[0]];
+			profileSecond = buildData.profiles[buildData.profileList[1]];
+			projectFirst = buildData.projects[profileFirst.projectList[0]];
+			projectSecond = buildData.projects[profileSecond.projectList[0]];
+			leaderFirst = buildData.users[projectFirst.leaderId];
+			leaderSecond = buildData.users[projectSecond.leaderId];
+			adminFirst = buildData.users[profileFirst.adminList[0]];
+			projectFirst.userList.every(function(id){
+				var user = buildData.users[id];
+				if(user.role === "COWORKER"){
+					coworkerFirst = user;
+					return false;
+				}
+				return true;
+			});
+			projectFirst.userList.every(function(id){
+				var user = buildData.users[id];
+				if(user.role === "INVESTOR"){
+					investorFirst = user;
+					return false;
+				}
+				return true;
+			});
+			projectFirst.userList.every(function(id){
+				var user = buildData.users[id];
+				if(user.role === "INSPECTOR"){
+					inspectorFirst = user;
+					return false;
+				}
+				return true;
+			});
+			projectFirst.userList.every(function(id){
+				var user = buildData.users[id];
+				if(user.role === "DESIGNER"){
+					designerFirst = user;
+					return false;
+				}
+				return true;
+			});
+			projectFirst.userList.every(function(id){
+				var user = buildData.users[id];
+				if(user.role === "SUBCONTRACTOR"){
+					subcontractorFirstA = user;
+					return false;
+				}
+				return true;
+			});
+			projectFirst.userList.every(function(id){
+				var user = buildData.users[id];
+				if(user.role === "SUBCONTRACTOR" && user.firmname !== subcontractorFirstA.firmname){
+					subcontractorFirstB = user;
+					return false;
+				}
+				return true;
+			});
+			done();
+		});
+		it("should not allow when message author is not in project (project not exist)", function(done){
+				request.post(url + "/messages/public")
+				.set('access-token', leaderFirst.token)
+				.field("project_id",999)
+
+				.end(function(err, res){
+					expect(res.status).to.be.equal(401);
+					done();
+				});
+		});
+		it("should not allow when author is in project but is not set recipient", function(done){
+				request.post(url + "/messages/public")
+				.set('access-token', leaderFirst.token)
+				.send({project_id:projectFirst.id})
+				.end(function(err, res){
+					expect(res.status).to.be.equal(422);
+					expect(res.body.message).to.be.equal("VALIDATION_ERROR");
+					expect(res.body.errors).to.include.some.property("type", "NO_RECIPIENT");
+					done();
+				});
+		});
+		it("should not allow when recipient is message author(same user cant add himself)", function(done){
+				request.post(url + "/messages/public")
+				.set('access-token', leaderFirst.token)
+				.send({project_id:projectFirst.id})
+				.send({account_list:[leaderFirst.id]})
+				.send({title:"test"})
+				.end(function(err, res){
+					expect(res.status).to.be.equal(422);
+					expect(res.body.message).to.be.equal("PROCESS_ERROR");
+					expect(res.body.type).to.be.equal("OWNER_RECIPIENT");
+					done();
+				});
+		});
+		it("should not allow when recipient is not in project", function(done){
+				request.post(url + "/messages/public")
+				.set('access-token', leaderFirst.token)
+				.send({project_id:projectFirst.id})
+				.send({account_list:[leaderSecond.id]})
+				.send({title:"test"})
+				.end(function(err, res){
+					expect(res.status).to.be.equal(422);
+					expect(res.body.message).to.be.equal("PROCESS_ERROR");
+					expect(res.body.type).to.be.equal("NO_PROJECT");
+					done();
+				});
+		});
+		it("should not allow when recipient and author roles are incorrect", function(done){
+				request.post(url + "/messages/public")
+				.set('access-token', subcontractorFirstA.token)
+				.send({project_id:projectFirst.id})
+				.send({account_list:[designerFirst.id]})
+				.send({title:"test"})
+				.end(function(err, res){
+					expect(res.status).to.be.equal(422);
+					expect(res.body.message).to.be.equal("PROCESS_ERROR");
+					expect(res.body.type).to.be.equal("ROLE_ADD_ROLE");
+					done();
+				});
+		});
+		it("should not allow when recipient and author roles are incorrect (check subcontractors with not equal firmnames)", function(done){
+				request.post(url + "/messages/public")
+				.set('access-token', subcontractorFirstA.token)
+				.send({project_id:projectFirst.id})
+				.send({account_list:[subcontractorFirstB.id]})
+				.send({title:"test"})
+				.end(function(err, res){
+					expect(res.status).to.be.equal(422);
+					expect(res.body.message).to.be.equal("PROCESS_ERROR");
+					expect(res.body.type).to.be.equal("ROLE_ADD_ROLE");
+					done();
+				});
+		});
+		it("should  allow when everything is ok (test without photos)", function(done){
+				request.post(url + "/messages/public")
+				.set('access-token', subcontractorFirstA.token)
+				.send({project_id:projectFirst.id})
+				.send({account_list:[leaderFirst.id]})
+				.send({content:"jakas wiadomość"})
+				.send({title:"test"})
+				.end(function(err, res){
+					expect(res.status).to.be.equal(200);
+					expect(res.body.groupId).to.be.above(0);
+					done();
+				});
+		});
+		it("should add photo inspector and send it by private message to designer", function(done){
+			request.post(url + "/photos")
+			.set('access-token', inspectorFirst.token)
+			.field("project_id",projectFirst.id)
+			.field("category","WAY_OF_MAKING")
+			.attach("photo","mocha/attachements/normalImage.jpg")
+			.end(function(err, res){
+				var photoId = res.body.photoId;
+				request.post(url + "/messages/public")
+				.set('access-token', inspectorFirst.token)
+				.send({project_id:projectFirst.id})
+				.send({account_list:[designerFirst.id]})
+				.send({content:"jakas wiadomość"})
+				.send({photo:[photoId]})
+				.send({title:"test"})
+				.end(function(err, res){
+					expect(res.status).to.be.equal(200);
+					expect(res.body.groupId).to.be.above(0);
+					done();
+				});
+			});
+		});
+		// it("should  allow answer on message", function(done){
+		// 		request.post(url + "/messages/public")
+		// 		.set('access-token', subcontractorFirstB.token)
+		// 		.send({project_id:projectFirst.id})
+		// 		.send({account_list:[leaderFirst.id]})
+		// 		.send({content:"jakas wiadomośćA"})
+		// 		.send({title:"test"})
+		// 		.end(function(err, res){
+		// 			var groupId = res.body.groupId;
+		// 			request.post(url + "/messages/public")
+		// 			.set('access-token', leaderFirst.token)
+		// 			.send({project_id:projectFirst.id})
+		// 			.send({account_list:[subcontractorFirstB.id]})
+		// 			.send({content:"jakas wiadomośćB"})
+		// 			.end(function(err, res){
+		// 				expect(res.status).to.be.equal(200);
+		// 				expect(res.body.groupId).to.be.above(0);
+		// 				expect(res.body.groupId).to.be.equal(groupId);
+		// 				done();
+		// 			});
+		// 		});
+		// });
+		// it("should  allow send message twice)", function(done){
+		// 		request.post(url + "/messages/public")
+		// 		.set('access-token', subcontractorFirstA.token)
+		// 		.send({project_id:projectFirst.id})
+		// 		.send({account_list:[leaderFirst.id]})
+		// 		.send({content:"jakas wiadomość"})
+		// 		.end(function(err, res){
+		// 			var groupId = res.body.groupId;
+		// 			request.post(url + "/messages/public")
+		// 			.set('access-token', subcontractorFirstA.token)
+		// 			.send({project_id:projectFirst.id})
+		// 			.send({account_list:[leaderFirst.id]})
+		// 			.send({content:"jakas wiadomość inna"})
+		// 			.end(function(err, res){
+		// 				expect(res.status).to.be.equal(200);
+		// 				expect(res.body.groupId).to.be.above(0);
+		// 				expect(res.body.groupId).to.be.equal(groupId);
+		// 				done();
+		// 			});
+		// 		});
+		// });
+	});
 	after(function(done){
 		server.close();
 		done();

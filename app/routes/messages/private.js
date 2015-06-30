@@ -26,6 +26,9 @@ router.post("/private", RuleAccess.isAllowed(), function(req, res, next){
 	req.sanitize('content').escape();
 	var photoList = [];
 	if(req.body.photo && req.body.photo.length && req.body.photo.length>0){
+		if(req.body.photo.length>10){
+			return res.sendValidationError({name : "AwValidationError", errors :[{type:"PHOTO_SIZE",field:"photo"}]});
+		}
 		for(var i=0; i< req.body.photo.length; i++){
 			var id = req.body.photo[i];
 			if (id === parseInt(id, 10)){
